@@ -1,0 +1,5 @@
+# 레고 AI 실습 필수 패키지
+# 설치: pip install -r requirements.txt
+ultralytics    # YOLO 공 탐지 (PyTorch 포함, 용량 큼)
+opencv-python  # 카메라 열기 + 화면 표시
+bleak          # 허브 블루투스 통신

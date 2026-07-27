@@ -1,0 +1,1542 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>레고 AI 공 탐지 실습 가이드 (Windows)</title>
+<style>
+  :root {
+    --ink: #1a1a1e;
+    --muted: #6b675e;
+    --paper: #fdfcf9;
+    --card: #ffffff;
+    --line: #e8e5dd;
+    --yellow: #f5c400;
+    --yellow-soft: #fff6d6;
+    --blue: #2563eb;
+    --blue-soft: #eaf1fe;
+    --green: #16a34a;
+    --green-soft: #ecf8f0;
+    --red: #dc2626;
+    --red-soft: #fdeeee;
+    --code-bg: #23221f;
+    --code-ink: #f4f2ec;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    line-height: 1.75;
+    font-size: 16px;
+  }
+  .wrap { max-width: 740px; margin: 0 auto; padding: 48px 20px 96px; }
+
+  /* ---------- header ---------- */
+  .eyebrow {
+    display: inline-block;
+    background: var(--yellow);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    padding: 3px 10px;
+    border-radius: 3px;
+  }
+  h1 {
+    font-size: 34px;
+    line-height: 1.3;
+    margin: 14px 0 6px;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .subtitle { color: var(--muted); margin: 0 0 8px; font-size: 16px; }
+
+  /* ---------- flow diagram ---------- */
+  .flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin: 36px 0 8px;
+    flex-wrap: wrap;
+  }
+  .flow-node {
+    flex: 1 1 120px;
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 10px;
+    text-align: center;
+    min-width: 108px;
+  }
+  .flow-node b { display: block; font-size: 15px; }
+  .flow-node span { font-size: 12.5px; color: var(--muted); }
+  .flow-link {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    min-width: 64px;
+  }
+  .flow-link .arrow { font-size: 18px; color: var(--ink); line-height: 1; }
+  .flow-link .via {
+    font-size: 11.5px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  /* ---------- checklist ---------- */
+  .prep {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 28px 0 0;
+  }
+  .prep h2 { margin: 0 0 10px; font-size: 18px; }
+  .prep ul { margin: 0; padding-left: 4px; list-style: none; }
+  .prep li { padding-left: 28px; position: relative; margin: 6px 0; }
+  .prep li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 7px;
+    width: 15px; height: 15px;
+    border: 2px solid var(--muted);
+    border-radius: 4px;
+  }
+
+  /* ---------- stages ---------- */
+  .stage { margin-top: 56px; }
+  .stage-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 2.5px solid var(--ink);
+    padding-bottom: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .stage-num {
+    width: 40px; height: 40px;
+    background: var(--yellow);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    flex: 0 0 auto;
+  }
+  .stage-head h2 { margin: 0; font-size: 22px; letter-spacing: -0.01em; }
+  .badge {
+    margin-left: auto;
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .badge.once { background: var(--blue-soft); color: var(--blue); }
+  .badge.every { background: var(--red-soft); color: var(--red); }
+
+  .stage ol { padding-left: 22px; margin: 12px 0; }
+  .stage ol li { margin: 8px 0; }
+  .stage p { margin: 10px 0; }
+
+  /* ---------- boxes ---------- */
+  .check, .warn, .note {
+    border-radius: 8px;
+    padding: 13px 16px 13px 44px;
+    margin: 18px 0;
+    position: relative;
+    font-size: 15px;
+  }
+  .check { background: var(--green-soft); }
+  .check::before {
+    content: "✓";
+    position: absolute; left: 16px; top: 12px;
+    color: var(--green);
+    font-weight: 800;
+    font-size: 17px;
+  }
+  .check b:first-child { color: var(--green); }
+  .warn { background: var(--yellow-soft); }
+  .warn::before {
+    content: "!";
+    position: absolute; left: 18px; top: 12px;
+    color: #a07800;
+    font-weight: 800;
+    font-size: 17px;
+  }
+  .note { background: var(--blue-soft); }
+  .note::before {
+    content: "i";
+    position: absolute; left: 18px; top: 12px;
+    color: var(--blue);
+    font-weight: 800;
+    font-style: italic;
+    font-size: 16px;
+  }
+
+  /* ---------- code ---------- */
+  .cmd {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border-radius: 8px;
+    padding: 13px 16px;
+    margin: 14px 0;
+    font-family: Consolas, "D2Coding", monospace;
+    font-size: 14.5px;
+    overflow-x: auto;
+    position: relative;
+    white-space: pre;
+  }
+  .cmd .prompt { color: #9a968c; user-select: none; }
+  .copy-btn {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: #3a3934;
+    color: #d6d3ca;
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .copy-btn:hover { background: #4a4942; }
+  .copy-btn:focus-visible { outline: 2px solid var(--yellow); outline-offset: 1px; }
+  code {
+    background: #f0ede5;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: Consolas, "D2Coding", monospace;
+    font-size: 0.92em;
+  }
+  .cmd code { background: none; padding: 0; }
+
+  details {
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    margin: 16px 0;
+    background: var(--card);
+  }
+  details summary {
+    padding: 12px 16px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  details summary:focus-visible { outline: 2px solid var(--blue); border-radius: 8px; }
+  details pre {
+    margin: 0;
+    padding: 14px 16px;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: Consolas, "D2Coding", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-x: auto;
+    border-radius: 0 0 7px 7px;
+  }
+
+  /* ---------- hub light legend ---------- */
+  .lights {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px 14px;
+    align-items: center;
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 16px 0;
+  }
+  .dot {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: inline-block;
+    flex: 0 0 auto;
+  }
+  .dot.blue { background: var(--blue); animation: blink 1.1s ease-in-out infinite; }
+  .dot.green { background: var(--green); }
+  .dot.red { background: var(--red); }
+  .dot.off { background: #d8d5cc; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+  @media (prefers-reduced-motion: reduce) {
+    .dot.blue { animation: none; }
+  }
+  .lights b { font-size: 15px; }
+  .lights span { color: var(--muted); font-size: 14px; }
+
+  /* ---------- run-order timeline ---------- */
+  .timeline { margin: 20px 0; padding: 0; list-style: none; }
+  .timeline li {
+    position: relative;
+    padding: 0 0 22px 52px;
+  }
+  .timeline li::before {
+    content: attr(data-n);
+    position: absolute;
+    left: 0; top: 0;
+    width: 34px; height: 34px;
+    background: var(--ink);
+    color: var(--yellow);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 16px;
+  }
+  .timeline li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 16px; top: 38px;
+    bottom: 2px;
+    width: 2px;
+    background: var(--line);
+  }
+  .timeline b { display: block; font-size: 16px; }
+  .timeline .tl-sub { color: var(--muted); font-size: 14.5px; }
+  .light-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 20px;
+    padding: 2px 11px 2px 7px;
+    vertical-align: middle;
+  }
+  .light-tag .dot { width: 11px; height: 11px; }
+
+  /* ---------- troubleshooting ---------- */
+  .ts { margin: 20px 0 0; }
+  .ts-item {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 10px 0;
+  }
+  .ts-item .symptom { font-weight: 700; font-size: 15.5px; }
+  .ts-item .symptom::before { content: "증상 "; color: var(--red); font-size: 12.5px; letter-spacing: 0.06em; margin-right: 4px; }
+  .ts-item .fix { font-size: 14.5px; color: var(--ink); margin-top: 5px; }
+  .ts-item .fix::before { content: "해결 "; color: var(--green); font-size: 12.5px; font-weight: 700; letter-spacing: 0.06em; margin-right: 4px; }
+
+  .dl-grid { display: grid; gap: 8px; margin: 16px 0; }
+  .dl-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: var(--card); border: 1.5px solid var(--line); border-radius: 8px;
+    padding: 10px 14px;
+  }
+  .dl-meta b { font-family: Consolas, "D2Coding", monospace; font-size: 14px; display: block; }
+  .dl-meta span { font-size: 13px; color: var(--muted); }
+  .dl-btn {
+    background: var(--ink); color: var(--yellow); border: none; border-radius: 6px;
+    font-family: inherit; font-weight: 700; font-size: 13.5px; padding: 8px 16px;
+    cursor: pointer; white-space: nowrap;
+  }
+  .dl-btn:hover { background: #33322e; }
+  .dl-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .dl-actions { display: flex; gap: 6px; flex: 0 0 auto; }
+  a.dl-btn { text-decoration: none; display: inline-block; }
+  .dl-btn.dl-copy { background: var(--card); color: var(--ink); border: 1.5px solid var(--line); }
+  .dl-btn.dl-copy:hover { background: var(--yellow-soft); }
+  footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1.5px solid var(--line);
+    color: var(--muted);
+    font-size: 13.5px;
+  }
+  footer code { font-size: 12.5px; }
+  h3 { font-size: 17px; margin: 24px 0 8px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">고색고 레고 실습</span>
+    <h1>공을 보여주면 모터가 돈다<br>— AI 공 탐지 실습 가이드</h1>
+    <p class="subtitle">Windows 노트북 기준 · 처음 하는 사람도 따라 할 수 있게 만든 안내서</p>
+  </header>
+
+  <div class="flow" role="img" aria-label="폰 카메라에서 WiFi로 노트북, 노트북에서 블루투스로 허브, 허브에서 케이블로 모터로 이어지는 데이터 흐름">
+    <div class="flow-node"><b>스마트폰</b><span>카메라 영상</span></div>
+    <div class="flow-link"><span class="via">WiFi</span><span class="arrow">→</span></div>
+    <div class="flow-node"><b>노트북</b><span>AI가 공 탐지</span></div>
+    <div class="flow-link"><span class="via">블루투스</span><span class="arrow">→</span></div>
+    <div class="flow-node"><b>SPIKE 허브</b><span>신호 수신</span></div>
+    <div class="flow-link"><span class="via">케이블</span><span class="arrow">→</span></div>
+    <div class="flow-node"><b>모터</b><span>1회전!</span></div>
+  </div>
+  <p class="subtitle" style="font-size:14px">폰이 눈, 노트북이 두뇌, 허브가 손. 셋을 차례로 연결하는 것이 오늘의 미션입니다.</p>
+
+  <section class="prep">
+    <h2>시작 전 준비물</h2>
+    <ul>
+      <li>Windows 노트북 (블루투스 되는 것) + Chrome 또는 Edge 브라우저</li>
+      <li>스마트폰 (아이폰/갤럭시 아무거나)</li>
+      <li>레고 SPIKE Prime 허브 + 모터 1개 + USB 케이블</li>
+      <li>선생님이 나눠준 실습 폴더 (<code>레고실습</code>) — 바탕화면에 복사해 두기</li>
+      <li>노트북과 폰이 <b>같은 WiFi</b>에 연결되어 있는지 확인</li>
+    </ul>
+  </section>
+
+  <!-- ================= downloads ================= -->
+  <section class="stage">
+    <div class="stage-head">
+      <div class="stage-num" style="background:var(--blue-soft); color:var(--blue)">↓</div>
+      <h2>실습 파일 내려받기</h2>
+    </div>
+    <p>버튼을 누르면 파일이 저장됩니다. 전부 바탕화면의 <code>레고실습</code> 폴더 한 곳에 모아두세요. (브라우저가 "다운로드" 폴더에 저장했으면 옮기면 됩니다.)</p>
+    <div class="dl-grid">
+      <div class="dl-item"><div class="dl-meta"><b>baseline_1_camera.py</b><span>연습 1 · 카메라 연결</span></div><div class="dl-actions"><a class="dl-btn" download="baseline_1_camera.py" href="data:text/plain;charset=utf-8,%22%22%22%0A%5Bbaseline%201%EB%8B%A8%EA%B3%84%5D%20%ED%9C%B4%EB%8C%80%ED%8F%B0%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%97%B0%EA%B2%B0%20%ED%85%8C%EC%8A%A4%ED%8A%B8%0A%0A%EB%AA%A9%ED%91%9C%3A%20%ED%8F%B0%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%ED%99%94%EB%A9%B4%EC%9D%B4%20%EB%85%B8%ED%8A%B8%EB%B6%81%20%EC%B0%BD%EC%97%90%20%EB%82%98%EC%98%A4%EB%A9%B4%20%EC%84%B1%EA%B3%B5%21%0A%EC%8B%A4%ED%96%89%20%EC%A0%84%3A%20Iriun%20%EC%95%B1%28%ED%8F%B0%29%20%2B%20Iriun%20%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%A8%28%EB%85%B8%ED%8A%B8%EB%B6%81%29%EC%9D%B4%20%EC%BC%9C%EC%A0%B8%20%EC%9E%88%EC%96%B4%EC%95%BC%20%ED%95%A9%EB%8B%88%EB%8B%A4.%0A%EC%A2%85%EB%A3%8C%3A%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%B0%BD%EC%9D%84%20%ED%81%B4%EB%A6%AD%ED%95%98%EA%B3%A0%20q%20%ED%82%A4%0A%22%22%22%0A%0Aimport%20sys%0A%0Aimport%20cv2%0A%0A%23%20%ED%8F%B0%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EB%B2%88%ED%98%B8.%20%EB%82%B4%20%EC%96%BC%EA%B5%B4%28%EB%85%B8%ED%8A%B8%EB%B6%81%20%EB%82%B4%EC%9E%A5%EC%BA%A0%29%EC%9D%B4%20%EB%82%98%EC%98%A4%EB%A9%B4%200%2C%201%2C%202%EB%A1%9C%20%EB%B0%94%EA%BF%94%EB%B3%B4%EC%84%B8%EC%9A%94.%0AVIDEO_SOURCE%20%3D%201%0A%0Aif%20sys.platform%20%3D%3D%20%22darwin%22%3A%20%20%23%20%EB%A7%A5%EC%97%90%EC%84%9C%20%ED%85%8C%EC%8A%A4%ED%8A%B8%ED%95%A0%20%EB%95%8C%EC%9A%A9%20%28Windows%EB%8A%94%20%EC%95%84%EB%9E%98%20%EC%A4%84%EB%A1%9C%20%EC%8B%A4%ED%96%89%EB%90%A8%29%0A%20%20%20%20cap%20%3D%20cv2.VideoCapture%28VIDEO_SOURCE%2C%20cv2.CAP_AVFOUNDATION%29%0Aelse%3A%0A%20%20%20%20cap%20%3D%20cv2.VideoCapture%28VIDEO_SOURCE%29%0A%0Aif%20not%20cap.isOpened%28%29%3A%0A%20%20%20%20print%28%22%EC%B9%B4%EB%A9%94%EB%9D%BC%EB%A5%BC%20%EC%97%B4%20%EC%88%98%20%EC%97%86%EC%8A%B5%EB%8B%88%EB%8B%A4.%20VIDEO_SOURCE%20%EC%88%AB%EC%9E%90%EB%A5%BC%20%EB%B0%94%EA%BF%94%EC%84%9C%20%EB%8B%A4%EC%8B%9C%20%EC%8B%A4%ED%96%89%ED%95%B4%20%EB%B3%B4%EC%84%B8%EC%9A%94.%22%29%0A%20%20%20%20raise%20SystemExit%0A%0Aprint%28%22%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%97%B4%EB%A6%BC%21%20%ED%8F%B0%20%ED%99%94%EB%A9%B4%EC%9D%B4%20%EB%82%98%EC%98%A4%EB%8A%94%EC%A7%80%20%ED%99%95%EC%9D%B8%ED%95%98%EC%84%B8%EC%9A%94.%20%28q%20%3D%20%EC%A2%85%EB%A3%8C%29%22%29%0A%0Awhile%20True%3A%0A%20%20%20%20ok%2C%20frame%20%3D%20cap.read%28%29%0A%20%20%20%20if%20not%20ok%3A%0A%20%20%20%20%20%20%20%20continue%0A%0A%20%20%20%20cv2.imshow%28%221.%20camera%20test%20%28q%3Dquit%29%22%2C%20frame%29%0A%0A%20%20%20%20if%20cv2.waitKey%281%29%20%26%200xFF%20%3D%3D%20ord%28%22q%22%29%3A%0A%20%20%20%20%20%20%20%20break%0A%0Acap.release%28%29%0Acv2.destroyAllWindows%28%29%0A">다운로드</a><button class="dl-btn dl-copy" data-file="baseline_1_camera.py">복사</button></div></div>
+      <div class="dl-item"><div class="dl-meta"><b>baseline_2_vision.py</b><span>연습 2 · AI 탐지</span></div><div class="dl-actions"><a class="dl-btn" download="baseline_2_vision.py" href="data:text/plain;charset=utf-8,%22%22%22%0A%5Bbaseline%202%EB%8B%A8%EA%B3%84%5D%20AI%20%EA%B3%B5%20%ED%83%90%EC%A7%80%20%ED%85%8C%EC%8A%A4%ED%8A%B8%20%28%EB%AA%A8%ED%84%B0%20%EC%97%86%EC%9D%B4%20%EB%88%88%EC%9C%BC%EB%A1%9C%EB%A7%8C%20%ED%99%95%EC%9D%B8%29%0A%0A%EB%AA%A9%ED%91%9C%3A%20%EA%B3%B5%EC%9D%84%20%EB%B9%84%EC%B6%94%EB%A9%B4%20%EC%B4%88%EB%A1%9D%20%EC%83%81%EC%9E%90%20%2B%20%EA%B3%B5%20%EC%9D%B4%EB%A6%84%20%2B%20%EC%A0%90%EC%88%98%EA%B0%80%20%EB%9C%A8%EB%A9%B4%20%EC%84%B1%EA%B3%B5%21%0A%EC%8B%A4%ED%96%89%20%EC%A0%84%3A%20baseline_1%EC%9D%B4%20%EC%84%B1%EA%B3%B5%ED%96%88%EC%96%B4%EC%95%BC%20%ED%95%A9%EB%8B%88%EB%8B%A4.%20best.pt%20%ED%8C%8C%EC%9D%BC%EC%9D%B4%20%EA%B0%99%EC%9D%80%20%ED%8F%B4%EB%8D%94%EC%97%90%20%EC%9E%88%EC%96%B4%EC%95%BC%20%ED%95%A9%EB%8B%88%EB%8B%A4.%0A%EC%A2%85%EB%A3%8C%3A%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%B0%BD%EC%9D%84%20%ED%81%B4%EB%A6%AD%ED%95%98%EA%B3%A0%20q%20%ED%82%A4%0A%22%22%22%0A%0Aimport%20sys%0A%0Aimport%20cv2%0Afrom%20ultralytics%20import%20YOLO%0A%0AVIDEO_SOURCE%20%3D%201%20%20%20%23%20baseline_1%EC%97%90%EC%84%9C%20%EC%84%B1%EA%B3%B5%ED%95%9C%20%EB%B2%88%ED%98%B8%EC%99%80%20%EA%B0%99%EA%B2%8C%0ACONF%20%3D%200.5%20%20%20%20%20%20%20%20%20%23%20%ED%83%90%EC%A7%80%20%EA%B8%B0%EC%A4%80%20%EC%A0%90%EC%88%98%280~1%29.%20%EA%B3%B5%EC%9D%B4%20%EC%9E%98%20%EC%95%88%20%EC%9E%A1%ED%9E%88%EB%A9%B4%200.3%EC%9C%BC%EB%A1%9C%20%EB%82%AE%EC%B6%B0%EB%B3%B4%EC%84%B8%EC%9A%94.%0A%0Aprint%28%22AI%20%EB%AA%A8%EB%8D%B8%20%EB%A1%9C%EB%94%A9%20%EC%A4%91...%20%28%EC%A1%B0%EA%B8%88%20%EA%B1%B8%EB%A0%A4%EC%9A%94%29%22%29%0Amodel%20%3D%20YOLO%28%22best.pt%22%29%0Aprint%28%22%EC%9D%B4%20AI%EA%B0%80%20%EC%95%8C%EC%95%84%EB%B3%B4%EB%8A%94%20%EA%B2%83%EB%93%A4%3A%22%2C%20list%28model.names.values%28%29%29%29%0A%0Aif%20sys.platform%20%3D%3D%20%22darwin%22%3A%0A%20%20%20%20cap%20%3D%20cv2.VideoCapture%28VIDEO_SOURCE%2C%20cv2.CAP_AVFOUNDATION%29%0Aelse%3A%0A%20%20%20%20cap%20%3D%20cv2.VideoCapture%28VIDEO_SOURCE%29%0A%0Aif%20not%20cap.isOpened%28%29%3A%0A%20%20%20%20print%28%22%EC%B9%B4%EB%A9%94%EB%9D%BC%EB%A5%BC%20%EC%97%B4%20%EC%88%98%20%EC%97%86%EC%8A%B5%EB%8B%88%EB%8B%A4.%20VIDEO_SOURCE%20%EC%88%AB%EC%9E%90%EB%A5%BC%20%ED%99%95%EC%9D%B8%ED%95%98%EC%84%B8%EC%9A%94.%22%29%0A%20%20%20%20raise%20SystemExit%0A%0Aprint%28%22%ED%83%90%EC%A7%80%20%EC%8B%9C%EC%9E%91%21%20%EA%B3%B5%EC%9D%84%20%EC%B9%B4%EB%A9%94%EB%9D%BC%EC%97%90%20%EB%B3%B4%EC%97%AC%EC%A3%BC%EC%84%B8%EC%9A%94.%20%28q%20%3D%20%EC%A2%85%EB%A3%8C%29%22%29%0A%0Awhile%20True%3A%0A%20%20%20%20ok%2C%20frame%20%3D%20cap.read%28%29%0A%20%20%20%20if%20not%20ok%3A%0A%20%20%20%20%20%20%20%20continue%0A%0A%20%20%20%20%23%20AI%EC%97%90%EA%B2%8C%20%EC%9D%B4%20%ED%99%94%EB%A9%B4%EC%97%90%20%EA%B3%B5%EC%9D%B4%20%EC%9E%88%EB%8A%94%EC%A7%80%20%EB%AC%BC%EC%96%B4%EB%B3%B8%EB%8B%A4%0A%20%20%20%20r%20%3D%20model.predict%28frame%2C%20conf%3DCONF%2C%20verbose%3DFalse%29%5B0%5D%0A%0A%20%20%20%20%23%20%EC%B0%BE%EC%9D%80%20%EA%B3%B5%EB%A7%88%EB%8B%A4%20%EC%B4%88%EB%A1%9D%20%EC%83%81%EC%9E%90%EB%A5%BC%20%EA%B7%B8%EB%A6%B0%EB%8B%A4%0A%20%20%20%20for%20box%20in%20r.boxes%3A%0A%20%20%20%20%20%20%20%20x1%2C%20y1%2C%20x2%2C%20y2%20%3D%20map%28int%2C%20box.xyxy%5B0%5D.tolist%28%29%29%0A%20%20%20%20%20%20%20%20label%20%3D%20model.names%5Bint%28box.cls%5B0%5D%29%5D%20%20%20%20%20%20%23%20%EA%B3%B5%20%EC%9D%B4%EB%A6%84%20%28red_normal%20%EB%93%B1%29%0A%20%20%20%20%20%20%20%20conf%20%3D%20float%28box.conf%5B0%5D%29%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20AI%EC%9D%98%20%ED%99%95%EC%8B%A0%20%EC%A0%95%EB%8F%84%20%280~1%29%0A%20%20%20%20%20%20%20%20cv2.rectangle%28frame%2C%20%28x1%2C%20y1%29%2C%20%28x2%2C%20y2%29%2C%20%280%2C%20255%2C%200%29%2C%202%29%0A%20%20%20%20%20%20%20%20cv2.putText%28frame%2C%20f%22%7Blabel%7D%20%7Bconf%3A.2f%7D%22%2C%20%28x1%2C%20max%2830%2C%20y1%20-%2010%29%29%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cv2.FONT_HERSHEY_SIMPLEX%2C%200.8%2C%20%280%2C%20255%2C%200%29%2C%202%29%0A%0A%20%20%20%20cv2.imshow%28%222.%20vision%20test%20%28q%3Dquit%29%22%2C%20frame%29%0A%0A%20%20%20%20if%20cv2.waitKey%281%29%20%26%200xFF%20%3D%3D%20ord%28%22q%22%29%3A%0A%20%20%20%20%20%20%20%20break%0A%0Acap.release%28%29%0Acv2.destroyAllWindows%28%29%0A">다운로드</a><button class="dl-btn dl-copy" data-file="baseline_2_vision.py">복사</button></div></div>
+      <div class="dl-item"><div class="dl-meta"><b>baseline_3_motor.py</b><span>연습 3 · 탐지→모터</span></div><div class="dl-actions"><a class="dl-btn" download="baseline_3_motor.py" href="data:text/plain;charset=utf-8,%22%22%22%0A%5Bbaseline%203%EB%8B%A8%EA%B3%84%5D%20%EA%B3%B5%20%ED%83%90%EC%A7%80%20%E2%86%92%20%ED%97%88%EB%B8%8C%20A%EB%AA%A8%ED%84%B0%201%ED%9A%8C%EC%A0%84%20%28%EC%B5%9C%EC%A2%85%20%EB%AA%A9%ED%91%9C%21%29%0A%0A%EB%AA%A9%ED%91%9C%3A%20%EA%B3%B5%EC%9D%84%20%EB%B3%B4%EC%97%AC%EC%A3%BC%EB%A9%B4%20%ED%97%88%EB%B8%8C%EC%9D%98%20A%EB%AA%A8%ED%84%B0%EA%B0%80%20%ED%95%9C%20%EB%B0%94%ED%80%B4%20%EB%8F%8C%EB%A9%B4%20%EC%84%B1%EA%B3%B5%21%0A%EC%8B%A4%ED%96%89%20%EC%A0%84%3A%0A%20%201.%20baseline_2%EA%B0%80%20%EC%84%B1%EA%B3%B5%ED%96%88%EC%96%B4%EC%95%BC%20%ED%95%A9%EB%8B%88%EB%8B%A4.%0A%20%202.%20%ED%97%88%EB%B8%8C%EC%97%90%20spike_hub_a_once.py%EA%B0%80%20%EB%93%A4%EC%96%B4%EC%9E%88%EC%96%B4%EC%95%BC%20%ED%95%A9%EB%8B%88%EB%8B%A4.%20%28%EA%B0%80%EC%9D%B4%EB%93%9C%204%EB%8B%A8%EA%B3%84%29%0A%20%203.%20Pybricks%20%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80%20%ED%83%AD%EC%9D%84%20%EC%99%84%EC%A0%84%ED%9E%88%20%EB%8B%AB%EC%9C%BC%EC%84%B8%EC%9A%94.%0A%20%204.%20%ED%97%88%EB%B8%8C%EB%A5%BC%20%22%ED%8C%8C%EB%9E%80%20%EA%B9%9C%EB%B9%A1%EC%9E%84%22%20%EC%83%81%ED%83%9C%EB%A1%9C%20%EB%A7%8C%EB%93%9C%EC%84%B8%EC%9A%94.%20%28%EC%B4%88%EB%A1%9D%EB%B6%88%EC%9D%B4%EB%A9%B4%20%EB%B2%84%ED%8A%BC%20%ED%95%9C%20%EB%B2%88%29%0A%EC%8B%A4%ED%96%89%20%ED%9B%84%3A%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%B0%BD%EC%9D%B4%20%EB%9C%A8%EB%A9%B4%20%E2%86%92%20%ED%97%88%EB%B8%8C%20%EA%B0%80%EC%9A%B4%EB%8D%B0%20%EB%B2%84%ED%8A%BC%EC%9D%84%20%EB%88%8C%EB%9F%AC%20%EC%B4%88%EB%A1%9D%EB%B6%88%EB%A1%9C%21%0A%EC%A2%85%EB%A3%8C%3A%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%B0%BD%EC%9D%84%20%ED%81%B4%EB%A6%AD%ED%95%98%EA%B3%A0%20q%20%ED%82%A4%0A%22%22%22%0A%0Aimport%20asyncio%0Aimport%20sys%0A%0Aimport%20cv2%0Afrom%20ultralytics%20import%20YOLO%0Afrom%20bleak%20import%20BleakScanner%2C%20BleakClient%0A%0AHUB_NAME%20%3D%20%22Pybricks%20Hub%22%20%20%20%23%20%E2%98%85%20%EC%9A%B0%EB%A6%AC%20%ED%8C%80%20%ED%97%88%EB%B8%8C%20%EC%9D%B4%EB%A6%84%EC%9C%BC%EB%A1%9C%20%EB%B0%94%EA%BE%B8%EC%84%B8%EC%9A%94%21%0AVIDEO_SOURCE%20%3D%201%20%20%20%20%20%20%20%20%20%20%20%20%23%20baseline_1%EC%97%90%EC%84%9C%20%EC%84%B1%EA%B3%B5%ED%95%9C%20%EB%B2%88%ED%98%B8%EC%99%80%20%EA%B0%99%EA%B2%8C%0ACONF%20%3D%200.5%0A%0A%23%20%ED%97%88%EB%B8%8C%EC%99%80%20%EB%8C%80%ED%99%94%ED%95%98%EB%8A%94%20%EB%B8%94%EB%A3%A8%ED%88%AC%EC%8A%A4%20%EC%A3%BC%EC%86%8C%20%28Pybricks%20%EA%B3%A0%EC%A0%95%EA%B0%92%2C%20%EB%B0%94%EA%BE%B8%EC%A7%80%20%EB%A7%88%EC%84%B8%EC%9A%94%29%0APYBRICKS_CHAR%20%3D%20%22c5f50002-8280-46da-89f4-6d8051e4aeef%22%0A%0A%0Aasync%20def%20main%28%29%3A%0A%20%20%20%20print%28%22AI%20%EB%AA%A8%EB%8D%B8%20%EB%A1%9C%EB%94%A9%20%EC%A4%91...%22%29%0A%20%20%20%20model%20%3D%20YOLO%28%22best.pt%22%29%0A%0A%20%20%20%20print%28f%27%ED%97%88%EB%B8%8C%20%22%7BHUB_NAME%7D%22%20%EA%B2%80%EC%83%89%20%EC%A4%91...%20%28%ED%97%88%EB%B8%8C%EA%B0%80%20%ED%8C%8C%EB%9E%80%20%EA%B9%9C%EB%B9%A1%EC%9E%84%EC%9D%B8%EC%A7%80%20%ED%99%95%EC%9D%B8%21%29%27%29%0A%20%20%20%20device%20%3D%20None%0A%20%20%20%20while%20device%20is%20None%3A%0A%20%20%20%20%20%20%20%20device%20%3D%20await%20BleakScanner.find_device_by_name%28HUB_NAME%2C%20timeout%3D10.0%29%0A%20%20%20%20%20%20%20%20if%20device%20is%20None%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20print%28%22%20%20%EC%95%84%EC%A7%81%20%EB%AA%BB%20%EC%B0%BE%EC%9D%8C.%20%ED%97%88%EB%B8%8C%EB%A5%BC%20%ED%8C%8C%EB%9E%80%20%EA%B9%9C%EB%B9%A1%EC%9E%84%EC%9C%BC%EB%A1%9C%20%EB%A7%8C%EB%93%A4%EB%A9%B4%20%EC%9E%90%EB%8F%99%20%EC%97%B0%EA%B2%B0%EB%90%A9%EB%8B%88%EB%8B%A4...%22%29%0A%0A%20%20%20%20async%20with%20BleakClient%28device%29%20as%20client%3A%0A%20%20%20%20%20%20%20%20print%28%22%ED%97%88%EB%B8%8C%20%EC%97%B0%EA%B2%B0%20%EC%99%84%EB%A3%8C%21%20%EC%B9%B4%EB%A9%94%EB%9D%BC%EB%A5%BC%20%EC%97%BD%EB%8B%88%EB%8B%A4.%22%29%0A%0A%20%20%20%20%20%20%20%20if%20sys.platform%20%3D%3D%20%22darwin%22%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20cap%20%3D%20cv2.VideoCapture%28VIDEO_SOURCE%2C%20cv2.CAP_AVFOUNDATION%29%0A%20%20%20%20%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20cap%20%3D%20cv2.VideoCapture%28VIDEO_SOURCE%29%0A%0A%20%20%20%20%20%20%20%20if%20not%20cap.isOpened%28%29%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20print%28%22%EC%B9%B4%EB%A9%94%EB%9D%BC%EB%A5%BC%20%EC%97%B4%20%EC%88%98%20%EC%97%86%EC%8A%B5%EB%8B%88%EB%8B%A4.%20VIDEO_SOURCE%20%EC%88%AB%EC%9E%90%EB%A5%BC%20%ED%99%95%EC%9D%B8%ED%95%98%EC%84%B8%EC%9A%94.%22%29%0A%20%20%20%20%20%20%20%20%20%20%20%20return%0A%0A%20%20%20%20%20%20%20%20seen%20%3D%200%20%20%20%20%20%20%23%20%EA%B3%B5%EC%9D%B4%20%EC%97%B0%EC%86%8D%EC%9C%BC%EB%A1%9C%20%EB%B3%B4%EC%9D%B8%20%ED%94%84%EB%A0%88%EC%9E%84%20%EC%88%98%0A%20%20%20%20%20%20%20%20empty%20%3D%200%20%20%20%20%20%23%20%EA%B3%B5%EC%9D%B4%20%EC%95%88%20%EB%B3%B4%EC%9D%B8%20%ED%94%84%EB%A0%88%EC%9E%84%20%EC%88%98%0A%20%20%20%20%20%20%20%20armed%20%3D%20True%20%20%23%20True%EC%9D%BC%20%EB%95%8C%EB%A7%8C%20%EB%AA%A8%ED%84%B0%20%EC%8B%A0%ED%98%B8%EB%A5%BC%20%EB%B3%B4%EB%83%84%20%28%EA%B3%B5%20%ED%95%98%EB%82%98%EB%8B%B9%20%EB%94%B1%201%EB%B2%88%29%0A%0A%20%20%20%20%20%20%20%20print%28%22%3E%3E%3E%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%B0%BD%EC%9D%B4%20%EB%9C%A8%EB%A9%B4%20%ED%97%88%EB%B8%8C%20%EA%B0%80%EC%9A%B4%EB%8D%B0%20%EB%B2%84%ED%8A%BC%EC%9D%84%20%EB%88%8C%EB%9F%AC%20%EC%B4%88%EB%A1%9D%EB%B6%88%EB%A1%9C%20%EB%A7%8C%EB%93%9C%EC%84%B8%EC%9A%94%21%20%3C%3C%3C%22%29%0A%20%20%20%20%20%20%20%20print%28%22%EA%B3%B5%EC%9D%84%20%EB%B3%B4%EC%97%AC%EC%A3%BC%EB%A9%B4%20%EB%AA%A8%ED%84%B0%EA%B0%80%20%EB%8F%95%EB%8B%88%EB%8B%A4.%20%28q%20%3D%20%EC%A2%85%EB%A3%8C%29%22%29%0A%0A%20%20%20%20%20%20%20%20while%20True%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20ok%2C%20frame%20%3D%20cap.read%28%29%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20not%20ok%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20await%20asyncio.sleep%280.1%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20continue%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20r%20%3D%20model.predict%28frame%2C%20conf%3DCONF%2C%20verbose%3DFalse%29%5B0%5D%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20for%20box%20in%20r.boxes%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20x1%2C%20y1%2C%20x2%2C%20y2%20%3D%20map%28int%2C%20box.xyxy%5B0%5D.tolist%28%29%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20label%20%3D%20model.names%5Bint%28box.cls%5B0%5D%29%5D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cv2.rectangle%28frame%2C%20%28x1%2C%20y1%29%2C%20%28x2%2C%20y2%29%2C%20%280%2C%20255%2C%200%29%2C%202%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cv2.putText%28frame%2C%20label%2C%20%28x1%2C%20max%2830%2C%20y1%20-%2010%29%29%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cv2.FONT_HERSHEY_SIMPLEX%2C%200.8%2C%20%280%2C%20255%2C%200%29%2C%202%29%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%23%20%EA%B3%B5%20%EA%B0%90%EC%A7%80%20%EC%95%88%EC%A0%95%ED%99%94%3A%203%ED%94%84%EB%A0%88%EC%9E%84%20%EC%97%B0%EC%86%8D%20%EB%B3%B4%EC%97%AC%EC%95%BC%20%EC%A7%84%EC%A7%9C%20%EA%B3%B5%EC%9C%BC%EB%A1%9C%20%EC%9D%B8%EC%A0%95%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20len%28r.boxes%29%20%3E%200%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20seen%20%2B%3D%201%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20empty%20%3D%200%0A%20%20%20%20%20%20%20%20%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20seen%20%3D%200%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20empty%20%2B%3D%201%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20if%20empty%20%3E%3D%203%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20armed%20%3D%20True%20%20%20%23%20%EA%B3%B5%EC%9D%B4%20%EC%82%AC%EB%9D%BC%EC%A1%8C%EC%9C%BC%EB%8B%88%20%EB%8B%A4%EC%9D%8C%20%EA%B3%B5%20%EB%B0%9B%EC%9D%84%20%EC%A4%80%EB%B9%84%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20armed%20and%20seen%20%3E%3D%203%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20print%28%22%EA%B3%B5%20%EA%B0%90%EC%A7%80%21%20%E2%86%92%20%ED%97%88%EB%B8%8C%EC%97%90%20%EB%AA%A8%ED%84%B0%201%ED%9A%8C%EC%A0%84%20%EC%8B%A0%ED%98%B8%20%EC%A0%84%EC%86%A1%22%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20b%22%5Cx06%22%20%3D%20%22%EC%9D%B4%EA%B1%B4%20%EB%AA%85%EB%A0%B9%EC%9D%B4%EC%95%BC%22%20%ED%91%9C%EC%8B%9C%2C%20b%22d%22%20%3D%20%EC%9A%B0%EB%A6%AC%EA%B0%80%20%EC%A0%95%ED%95%9C%20%27%EB%8F%8C%EC%95%84%EB%9D%BC%27%20%EC%8B%A0%ED%98%B8%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20await%20client.write_gatt_char%28PYBRICKS_CHAR%2C%20b%22%5Cx06d%22%2C%20response%3DTrue%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20armed%20%3D%20False%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20cv2.imshow%28%223.%20detect%20-%3E%20motor%20%28q%3Dquit%29%22%2C%20frame%29%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20cv2.waitKey%281%29%20%26%200xFF%20%3D%3D%20ord%28%22q%22%29%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20break%0A%0A%20%20%20%20%20%20%20%20cap.release%28%29%0A%20%20%20%20%20%20%20%20cv2.destroyAllWindows%28%29%0A%0A%20%20%20%20%20%20%20%20print%28%22%ED%97%88%EB%B8%8C%EC%97%90%20%EC%A2%85%EB%A3%8C%20%EC%8B%A0%ED%98%B8%20%EC%A0%84%EC%86%A1%22%29%0A%20%20%20%20%20%20%20%20await%20client.write_gatt_char%28PYBRICKS_CHAR%2C%20b%22%5Cx06q%22%2C%20response%3DTrue%29%0A%0A%0Aif%20__name__%20%3D%3D%20%22__main__%22%3A%0A%20%20%20%20if%20sys.platform%20%3D%3D%20%22win32%22%3A%0A%20%20%20%20%20%20%20%20asyncio.set_event_loop_policy%28asyncio.WindowsSelectorEventLoopPolicy%28%29%29%0A%20%20%20%20asyncio.run%28main%28%29%29%0A">다운로드</a><button class="dl-btn dl-copy" data-file="baseline_3_motor.py">복사</button></div></div>
+      <div class="dl-item"><div class="dl-meta"><b>spike_hub_a_once.py</b><span>허브에 넣는 모터 프로그램</span></div><div class="dl-actions"><a class="dl-btn" download="spike_hub_a_once.py" href="data:text/plain;charset=utf-8,%23%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%0A%23%20SPIKE%20%ED%97%88%EB%B8%8C%20%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%A8%20%28Pybricks%29%20%E2%80%94%20A%EB%AA%A8%ED%84%B0%20%EC%A0%84%EC%9A%A9%2C%20%22%ED%83%90%EC%A7%80%EB%90%98%EB%A9%B4%201%ED%9A%8C%EC%A0%84%22%EB%A7%8C%20%ED%85%8C%EC%8A%A4%ED%8A%B8%0A%23%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%0A%23%20Mac%EC%9D%B4%20%EC%95%84%EB%8B%88%EB%9D%BC%20%22%ED%97%88%EB%B8%8C%22%EC%97%90%EC%84%9C%20%EB%8F%95%EB%8B%88%EB%8B%A4.%0A%23%20%20%20code.pybricks.com%20%EC%A0%91%EC%86%8D%20%E2%86%92%20%ED%97%88%EB%B8%8C%20%EC%97%B0%EA%B2%B0%20%E2%86%92%20%EB%B6%99%EC%97%AC%EB%84%A3%EA%B8%B0%20%E2%86%92%20Download%20%E2%86%92%0A%23%20%20%20Pybricks%20Code%20%EC%97%B0%EA%B2%B0%20%EB%81%8A%EA%B8%B0%20%E2%86%92%20Mac%EC%97%90%EC%84%9C%20detect_spin_a.py%20%EC%8B%A4%ED%96%89%20%E2%86%92%0A%23%20%20%20%ED%97%88%EB%B8%8C%20%EA%B0%80%EC%9A%B4%EB%8D%B0%20%EB%B2%84%ED%8A%BC%20%EB%88%8C%EB%9F%AC%20%EC%8B%9C%EC%9E%91.%0A%23%0A%23%20Mac%EC%9D%B4%20%EA%B3%B5%EC%9D%84%20%EA%B0%90%EC%A7%80%ED%95%A0%20%EB%95%8C%EB%A7%88%EB%8B%A4%20%22d%22%EB%A5%BC%20%EB%B3%B4%EB%82%B4%EA%B3%A0%2C%20%ED%97%88%EB%B8%8C%EB%8A%94%20A%20%EB%AA%A8%ED%84%B0%EB%A5%BC%20SPIN_ANGLE%EB%A7%8C%ED%81%BC%0A%23%20%28%EA%B8%B0%EB%B3%B8%20360%EB%8F%84%20%3D%201%ED%9A%8C%EC%A0%84%29%20%EB%8F%8C%EB%A6%B0%20%EB%92%A4%20%EB%8B%A4%EC%9D%8C%20%EA%B0%90%EC%A7%80%EB%A5%BC%20%EA%B8%B0%EB%8B%A4%EB%A6%B0%EB%8B%A4.%20%EA%B7%B8%20%EC%99%B8%20%EB%8F%99%EC%9E%91%20%EC%97%86%EC%9D%8C%0A%23%20%28%EC%83%89%EC%83%81%20%EB%B6%84%EB%A5%98%C2%B7%EC%BB%A8%EB%B2%A0%EC%9D%B4%EC%96%B4%20%EC%83%81%EC%8B%9C%20%ED%9A%8C%EC%A0%84%20%EC%97%86%EC%9D%8C%20%E2%80%94%20spike_hub.py%EC%99%80%20%EB%8B%A4%EB%A6%84%29.%0A%23%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%0A%0Afrom%20pybricks.hubs%20import%20PrimeHub%0Afrom%20pybricks.pupdevices%20import%20Motor%0Afrom%20pybricks.parameters%20import%20Port%2C%20Color%0Afrom%20pybricks.tools%20import%20wait%0A%0Afrom%20usys%20import%20stdin%2C%20stdout%0Afrom%20uselect%20import%20poll%0A%0Ahub%20%3D%20PrimeHub%28%29%0A%0APORT_A%20%3D%20Port.A%0A%0ASPIN_SPEED%20%3D%20500%20%20%20%23%20deg%2Fs%0ASPIN_ANGLE%20%3D%20360%20%20%20%20%23%201%ED%9A%8C%EC%A0%84%0A%0A%0Adef%20try_motor%28port%2C%20name%29%3A%0A%20%20%20%20try%3A%0A%20%20%20%20%20%20%20%20m%20%3D%20Motor%28port%29%0A%20%20%20%20%20%20%20%20print%28name%2C%20%22OK%22%29%0A%20%20%20%20%20%20%20%20return%20m%0A%20%20%20%20except%20Exception%3A%0A%20%20%20%20%20%20%20%20print%28name%2C%20%22NOT%20FOUND%22%29%0A%20%20%20%20%20%20%20%20return%20None%0A%0A%0Adef%20send%28msg%29%3A%0A%20%20%20%20stdout.buffer.write%28msg%29%0A%0A%0AA%20%3D%20try_motor%28PORT_A%2C%20%22A%22%29%0A%0Akeyboard%20%3D%20poll%28%29%0Akeyboard.register%28stdin%29%0A%0Ahub.light.on%28Color.GREEN%29%0Asend%28b%22rdy%22%29%0A%0Awhile%20True%3A%0A%20%20%20%20if%20keyboard.poll%280%29%3A%0A%20%20%20%20%20%20%20%20cmd%20%3D%20stdin.buffer.read%281%29%0A%20%20%20%20%20%20%20%20if%20not%20cmd%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20continue%0A%0A%20%20%20%20%20%20%20%20if%20cmd%20%3D%3D%20b%22q%22%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20break%0A%0A%20%20%20%20%20%20%20%20if%20cmd%20%3D%3D%20b%22d%22%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20hub.display.char%28%22d%22%29%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20A%20is%20not%20None%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20A.run_angle%28SPIN_SPEED%2C%20SPIN_ANGLE%29%0A%0A%20%20%20%20%20%20%20%20send%28b%22rdy%22%29%0A%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20wait%2810%29%0A%0Aif%20A%20is%20not%20None%3A%0A%20%20%20%20A.stop%28%29%0Ahub.light.on%28Color.RED%29%0Ahub.display.off%28%29%0A">다운로드</a><button class="dl-btn dl-copy" data-file="spike_hub_a_once.py">복사</button></div></div>
+      <div class="dl-item"><div class="dl-meta"><b>detect_spin_a.py</b><span>본편 프로그램 (안전장치 포함)</span></div><div class="dl-actions"><a class="dl-btn" download="detect_spin_a.py" href="data:text/plain;charset=utf-8,%22%22%22%0A%ED%83%90%EC%A7%80%EB%90%98%EB%A9%B4%20%ED%97%88%EB%B8%8C%20A%20%EB%AA%A8%ED%84%B0%201%ED%9A%8C%EC%A0%84%20%28%EC%83%89%EC%83%81%20%EB%B6%84%EB%A5%98%20%EC%97%86%EB%8A%94%20%ED%85%8C%EC%8A%A4%ED%8A%B8%EC%9A%A9%29.%0A%0Adetect_only.py%EC%B2%98%EB%9F%BC%20%EC%B9%B4%EB%A9%94%EB%9D%BC%EB%A5%BC%20%EC%97%B4%EC%96%B4%20YOLO%20%EB%B0%95%EC%8A%A4%EB%A5%BC%20%ED%99%94%EB%A9%B4%EC%97%90%20%EA%B7%B8%EB%A0%A4%20%EB%B3%B4%EC%97%AC%EC%A3%BC%EB%A9%B4%EC%84%9C%2C%0A%EA%B3%B5%EC%9D%B4%20%EC%97%B0%EC%86%8D%20REQUIRED_OBJECT_FRAMES%20%ED%94%84%EB%A0%88%EC%9E%84%20%EC%9D%B4%EC%83%81%20%EC%9E%A1%ED%9E%88%EB%A9%B4%20%ED%97%88%EB%B8%8C%EC%97%90%20%22d%22%EB%A5%BC%20%EB%B3%B4%EB%82%B8%EB%8B%A4.%0A%ED%97%88%EB%B8%8C%20%EC%AA%BD%EC%9D%80%20spike_hub_a_once.py%EB%A5%BC%20%EB%A8%BC%EC%A0%80%20%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C%ED%95%B4%20%EC%8B%A4%ED%96%89%ED%95%B4%EC%95%BC%20%ED%95%9C%EB%8B%A4%0A%28A%20%EB%AA%A8%ED%84%B0%EB%A7%8C%20%EC%9E%88%EA%B3%A0%2C%20%EB%B0%9B%EC%9C%BC%EB%A9%B4%201%ED%9A%8C%EC%A0%84%20%ED%9B%84%20%EB%8C%80%EA%B8%B0%29.%0A%0A%EC%82%AC%EC%9A%A9%EB%B2%95%3A%0A%20%20%20%20python%20detect_spin_a.py%0A%0A%EC%A1%B0%EC%9E%91%3A%0A%20%20%20%20q%20%20%E2%86%92%20%EC%A2%85%EB%A3%8C%20%28%ED%97%88%EB%B8%8C%EC%97%90%20%EC%A2%85%EB%A3%8C%20%EC%BD%94%EB%93%9C%20%EC%A0%84%EC%86%A1%29%0A%22%22%22%0A%0Aimport%20asyncio%0Aimport%20sys%0Aimport%20time%0Afrom%20contextlib%20import%20suppress%0A%0Aimport%20cv2%0Afrom%20ultralytics%20import%20YOLO%0Afrom%20bleak%20import%20BleakScanner%2C%20BleakClient%0A%0APYBRICKS_COMMAND_EVENT_CHAR_UUID%20%3D%20%22c5f50002-8280-46da-89f4-6d8051e4aeef%22%0A%0AHUB_NAME%20%3D%20%22Pybricks%20Hub%22%0AMODEL_PATH%20%3D%20%22best.pt%22%0A%0AVIDEO_SOURCE%20%3D%201%20%20%20%20%20%20%20%20%20%20%23%201%20%3D%20iPhone%20%28%EC%97%B0%EC%86%8D%EC%84%B1%20%EC%B9%B4%EB%A9%94%EB%9D%BC%29%0ACAM_WIDTH%20%3D%201280%0ACAM_HEIGHT%20%3D%20720%0A%0ACONF%20%3D%200.5%0A%0A%23%20%EA%B3%B5%20%ED%95%98%EB%82%98%EB%8B%B9%20%ED%95%9C%20%EB%B2%88%EB%A7%8C%20%ED%8A%B8%EB%A6%AC%EA%B1%B0%EB%90%98%EB%8F%84%EB%A1%9D%3A%20%EC%97%B0%EC%86%8D%20%EA%B0%90%EC%A7%80%20%ED%94%84%EB%A0%88%EC%9E%84%20%2F%20%EC%97%B0%EC%86%8D%20%EB%B9%88%20%ED%94%84%EB%A0%88%EC%9E%84%20%EC%A1%B0%EA%B1%B4%0AREQUIRED_OBJECT_FRAMES%20%3D%203%0AREQUIRED_EMPTY_FRAMES%20%3D%203%0A%0A%0Adef%20open_camera%28source%2C%20retries%3D6%2C%20delay%3D1.0%29%3A%0A%20%20%20%20for%20attempt%20in%20range%281%2C%20retries%20%2B%201%29%3A%0A%20%20%20%20%20%20%20%20if%20isinstance%28source%2C%20int%29%20and%20sys.platform%20%3D%3D%20%22darwin%22%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20cap%20%3D%20cv2.VideoCapture%28source%2C%20cv2.CAP_AVFOUNDATION%29%0A%20%20%20%20%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20cap%20%3D%20cv2.VideoCapture%28source%29%0A%0A%20%20%20%20%20%20%20%20if%20cap.isOpened%28%29%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20isinstance%28source%2C%20int%29%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cap.set%28cv2.CAP_PROP_FRAME_WIDTH%2C%20CAM_WIDTH%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cap.set%28cv2.CAP_PROP_FRAME_HEIGHT%2C%20CAM_HEIGHT%29%0A%20%20%20%20%20%20%20%20%20%20%20%20ok%20%3D%20False%0A%20%20%20%20%20%20%20%20%20%20%20%20for%20_%20in%20range%2810%29%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20ok%2C%20_%20%3D%20cap.read%28%29%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20ok%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20w%20%3D%20int%28cap.get%28cv2.CAP_PROP_FRAME_WIDTH%29%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20h%20%3D%20int%28cap.get%28cv2.CAP_PROP_FRAME_HEIGHT%29%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20print%28f%22%5B%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%97%B4%EB%A6%BC%5D%20source%3D%7Bsource%7D%2C%20%7Bw%7Dx%7Bh%7D%22%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20return%20cap%0A%0A%20%20%20%20%20%20%20%20cap.release%28%29%0A%20%20%20%20%20%20%20%20print%28f%22%5B%EC%9E%AC%EC%8B%9C%EB%8F%84%20%7Battempt%7D%2F%7Bretries%7D%5D%20source%3D%7Bsource%7D%22%29%0A%20%20%20%20%20%20%20%20time.sleep%28delay%29%0A%20%20%20%20return%20None%0A%0A%0Aasync%20def%20main%28%29%3A%0A%20%20%20%20ready_event%20%3D%20asyncio.Event%28%29%0A%0A%20%20%20%20def%20handle_disconnect%28_%29%3A%0A%20%20%20%20%20%20%20%20print%28%22Hub%20disconnected.%22%29%0A%0A%20%20%20%20def%20handle_rx%28_%2C%20data%3A%20bytearray%29%3A%0A%20%20%20%20%20%20%20%20if%20data%20and%20data%5B0%5D%20%3D%3D%200x01%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20payload%20%3D%20data%5B1%3A%5D.strip%28%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%23%20%ED%97%88%EB%B8%8C%EA%B0%80%20%EB%AD%90%EB%9D%BC%EB%8F%84%20%EC%9D%91%EB%8B%B5%ED%95%98%EB%A9%B4%20%EB%A1%9C%EA%B7%B8%20%28%EB%AA%A8%ED%84%B0%20%EC%B2%98%EB%A6%AC%20%ED%9B%84%20rdy%EB%A5%BC%20%EB%B3%B4%EB%83%84%20%E2%86%92%20%ED%97%88%EB%B8%8C%20%EC%8B%A4%ED%96%89%20%EC%A4%91%20%ED%99%95%EC%9D%B8%EC%9A%A9%29%0A%20%20%20%20%20%20%20%20%20%20%20%20print%28f%22%5B%ED%97%88%EB%B8%8C%20%EC%9D%91%EB%8B%B5%5D%20%7Bpayload%7D%22%29%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20payload%20%3D%3D%20b%22rdy%22%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20ready_event.set%28%29%0A%0A%20%20%20%20async%20def%20send_code%28client%2C%20code%3A%20str%29%3A%0A%20%20%20%20%20%20%20%20%23%20rdy%20%ED%95%B8%EB%93%9C%EC%85%B0%EC%9D%B4%ED%81%AC%20%EC%97%86%EC%9D%B4%20%EB%B0%94%EB%A1%9C%20%EC%A0%84%EC%86%A1%20%28%ED%97%88%EB%B8%8C%20%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%A8%EC%9D%B4%20%EC%8B%A4%ED%96%89%20%EC%A4%91%EC%9D%B4%EB%A9%B4%20%EC%A6%89%EC%8B%9C%20%EC%B2%98%EB%A6%AC%EB%90%A8%29%0A%20%20%20%20%20%20%20%20await%20client.write_gatt_char%28%0A%20%20%20%20%20%20%20%20%20%20%20%20PYBRICKS_COMMAND_EVENT_CHAR_UUID%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20b%22%5Cx06%22%20%2B%20code.encode%28%22utf-8%22%29%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20response%3DTrue%2C%0A%20%20%20%20%20%20%20%20%29%0A%20%20%20%20%20%20%20%20print%28f%22%5B%EC%A0%84%EC%86%A1%20%EC%99%84%EB%A3%8C%5D%20code%3D%7Bcode%7D%22%29%0A%0A%20%20%20%20print%28%22YOLO%20%EB%AA%A8%EB%8D%B8%20%EB%A1%9C%EB%94%A9%20%EC%A4%91...%22%29%0A%20%20%20%20model%20%3D%20YOLO%28MODEL_PATH%29%0A%20%20%20%20print%28%22%ED%81%B4%EB%9E%98%EC%8A%A4%3A%22%2C%20model.names%29%0A%0A%20%20%20%20print%28%22%ED%97%88%EB%B8%8C%20%EA%B2%80%EC%83%89%20%EC%A4%91...%20%28%ED%97%88%EB%B8%8C%EB%A5%BC%20%27%ED%8C%8C%EB%9E%80%20%EC%A0%90%EB%A9%B8%27%3D%EC%97%B0%EA%B2%B0%20%EB%8C%80%EA%B8%B0%20%EC%83%81%ED%83%9C%EB%A1%9C%20%EB%91%90%EC%84%B8%EC%9A%94%29%22%29%0A%20%20%20%20print%28%22%20%20%E2%80%BB%20%EC%B4%88%EB%A1%9D%EB%B6%88%EC%9D%B4%EB%A9%B4%20%EA%B2%80%EC%83%89%EC%97%90%20%EC%95%88%20%EC%9E%A1%ED%9E%99%EB%8B%88%EB%8B%A4%20%E2%86%92%20%ED%97%88%EB%B8%8C%20%EB%B2%84%ED%8A%BC%20%EB%88%8C%EB%9F%AC%20%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%A8%EC%9D%84%20%EB%A9%88%EC%B6%B0%20%ED%8C%8C%EB%9E%80%20%EC%A0%90%EB%A9%B8%EB%A1%9C.%22%29%0A%20%20%20%20device%20%3D%20None%0A%20%20%20%20for%20attempt%20in%20range%281%2C%2019%29%3A%20%20%23%2010%EC%B4%88%20x%2018%ED%9A%8C%20%3D%20%EC%B5%9C%EB%8C%80%203%EB%B6%84%20%EB%8C%80%EA%B8%B0%0A%20%20%20%20%20%20%20%20device%20%3D%20await%20BleakScanner.find_device_by_name%28HUB_NAME%2C%20timeout%3D10.0%29%0A%20%20%20%20%20%20%20%20if%20device%20is%20not%20None%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20break%0A%20%20%20%20%20%20%20%20print%28f%22%20%20%5B%7Battempt%7D%5D%20%EC%95%84%EC%A7%81%20%EB%AA%BB%20%EC%B0%BE%EC%9D%8C%2C%20%EC%9E%AC%EC%8B%9C%EB%8F%84%20%EC%A4%91...%20%28%ED%97%88%EB%B8%8C%EB%A5%BC%20%ED%8C%8C%EB%9E%80%20%EC%A0%90%EB%A9%B8%EB%A1%9C%20%EB%91%90%EB%A9%B4%20%EC%9E%90%EB%8F%99%20%EC%97%B0%EA%B2%B0%29%22%29%0A%20%20%20%20if%20device%20is%20None%3A%0A%20%20%20%20%20%20%20%20print%28f%22%ED%97%88%EB%B8%8C%EB%A5%BC%20%EC%B0%BE%EC%A7%80%20%EB%AA%BB%ED%96%88%EC%8A%B5%EB%8B%88%EB%8B%A4%3A%20%7BHUB_NAME%7D%22%29%0A%20%20%20%20%20%20%20%20print%28%22%ED%99%95%EC%9D%B8%3A%20Pybricks%20Code%20%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80%20%ED%83%AD%20%EB%8B%AB%EA%B8%B0%2C%20%ED%97%88%EB%B8%8C%20%EC%A0%84%EC%9B%90%2C%20%ED%8C%8C%EB%9E%80%20%EC%A0%90%EB%A9%B8%20%EC%97%AC%EB%B6%80%22%29%0A%20%20%20%20%20%20%20%20return%0A%0A%20%20%20%20print%28%22%ED%97%88%EB%B8%8C%20%EC%B0%BE%EC%9D%8C%3A%22%2C%20device.name%29%0A%0A%20%20%20%20async%20with%20BleakClient%28device%2C%20disconnected_callback%3Dhandle_disconnect%29%20as%20client%3A%0A%20%20%20%20%20%20%20%20await%20client.start_notify%28PYBRICKS_COMMAND_EVENT_CHAR_UUID%2C%20handle_rx%29%0A%0A%20%20%20%20%20%20%20%20print%28%22%ED%97%88%EB%B8%8C%20%EC%97%B0%EA%B2%B0%20%EC%99%84%EB%A3%8C.%20%EC%B9%B4%EB%A9%94%EB%9D%BC%EB%A5%BC%20%EC%97%BD%EB%8B%88%EB%8B%A4.%22%29%0A%20%20%20%20%20%20%20%20print%28%22%3E%3E%3E%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%B0%BD%EC%9D%B4%20%EB%9C%A8%EB%A9%B4%2C%20%ED%97%88%EB%B8%8C%20%EA%B0%80%EC%9A%B4%EB%8D%B0%20%EB%B2%84%ED%8A%BC%EC%9D%84%20%EB%88%8C%EB%9F%AC%20%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%A8%EC%9D%84%20%EC%8B%9C%EC%9E%91%28%EC%B4%88%EB%A1%9D%EB%B6%88%29%ED%95%B4%20%EB%91%90%EC%84%B8%EC%9A%94.%20%3C%3C%3C%22%29%0A%0A%20%20%20%20%20%20%20%20print%28f%22%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%97%AC%EB%8A%94%20%EC%A4%91...%20%28source%3D%7BVIDEO_SOURCE%7D%29%22%29%0A%20%20%20%20%20%20%20%20cap%20%3D%20open_camera%28VIDEO_SOURCE%29%0A%20%20%20%20%20%20%20%20if%20cap%20is%20None%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20print%28%22%EC%B9%B4%EB%A9%94%EB%9D%BC%EB%A5%BC%20%EC%97%B4%20%EC%88%98%20%EC%97%86%EC%8A%B5%EB%8B%88%EB%8B%A4.%20find_camera.py%EB%A1%9C%20%EC%9D%B8%EB%8D%B1%EC%8A%A4%20%ED%99%95%EC%9D%B8%ED%95%98%EC%84%B8%EC%9A%94.%22%29%0A%20%20%20%20%20%20%20%20%20%20%20%20return%0A%0A%20%20%20%20%20%20%20%20object_seen_frames%20%3D%200%0A%20%20%20%20%20%20%20%20empty_count%20%3D%200%0A%20%20%20%20%20%20%20%20armed%20%3D%20True%20%20%23%20True%EB%A9%B4%20%EB%8B%A4%EC%9D%8C%20%EA%B0%90%EC%A7%80%20%EC%8B%9C%20%ED%8A%B8%EB%A6%AC%EA%B1%B0%20%EA%B0%80%EB%8A%A5%0A%0A%20%20%20%20%20%20%20%20read_fail_count%20%3D%200%0A%20%20%20%20%20%20%20%20max_read_fail%20%3D%2030%0A%0A%20%20%20%20%20%20%20%20print%28%22%EC%8B%A4%EC%8B%9C%EA%B0%84%20%ED%83%90%EC%A7%80%20%EC%8B%9C%EC%9E%91.%20%EC%A2%85%EB%A3%8C%ED%95%98%EB%A0%A4%EB%A9%B4%20q%EB%A5%BC%20%EB%88%84%EB%A5%B4%EC%84%B8%EC%9A%94.%22%29%0A%0A%20%20%20%20%20%20%20%20while%20True%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20ok%2C%20frame%20%3D%20cap.read%28%29%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20not%20ok%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20read_fail_count%20%2B%3D%201%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20if%20read_fail_count%20%3E%3D%20max_read_fail%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20print%28%22%ED%94%84%EB%A0%88%EC%9E%84%EC%9D%84%20%EA%B3%84%EC%86%8D%20%EC%9D%BD%EC%A7%80%20%EB%AA%BB%ED%95%B4%20%EC%A2%85%EB%A3%8C%ED%95%A9%EB%8B%88%EB%8B%A4.%22%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20break%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20await%20asyncio.sleep%280.1%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20continue%0A%20%20%20%20%20%20%20%20%20%20%20%20read_fail_count%20%3D%200%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20r%20%3D%20model.predict%28frame%2C%20conf%3DCONF%2C%20verbose%3DFalse%29%5B0%5D%0A%20%20%20%20%20%20%20%20%20%20%20%20n%20%3D%20len%28r.boxes%29%20if%20r.boxes%20is%20not%20None%20else%200%0A%20%20%20%20%20%20%20%20%20%20%20%20object_visible%20%3D%20n%20%3E%200%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20r.boxes%20is%20not%20None%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20for%20b%20in%20r.boxes%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20x1%2C%20y1%2C%20x2%2C%20y2%20%3D%20map%28int%2C%20b.xyxy%5B0%5D.tolist%28%29%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20conf%20%3D%20float%28b.conf%5B0%5D%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20label%20%3D%20model.names%5Bint%28b.cls%5B0%5D%29%5D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cv2.rectangle%28frame%2C%20%28x1%2C%20y1%29%2C%20%28x2%2C%20y2%29%2C%20%280%2C%20255%2C%200%29%2C%202%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cv2.putText%28%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20frame%2C%20f%22%7Blabel%7D%20%7Bconf%3A.2f%7D%22%2C%20%28x1%2C%20max%2830%2C%20y1%20-%2010%29%29%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cv2.FONT_HERSHEY_SIMPLEX%2C%200.7%2C%20%280%2C%20255%2C%200%29%2C%202%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%29%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20object_visible%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20object_seen_frames%20%2B%3D%201%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20empty_count%20%3D%200%0A%20%20%20%20%20%20%20%20%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20object_seen_frames%20%3D%200%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20empty_count%20%2B%3D%201%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20if%20empty_count%20%3E%3D%20REQUIRED_EMPTY_FRAMES%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20armed%20%3D%20True%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20armed%20and%20object_seen_frames%20%3E%3D%20REQUIRED_OBJECT_FRAMES%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20print%28f%22%5B%EA%B3%B5%20%EC%97%B0%EC%86%8D%20%7BREQUIRED_OBJECT_FRAMES%7D%ED%94%84%EB%A0%88%EC%9E%84%20%EA%B0%90%EC%A7%80%20%E2%86%92%20A%EB%AA%A8%ED%84%B0%201%ED%9A%8C%EC%A0%84%20%EB%AA%85%EB%A0%B9%20%EC%A0%84%EC%86%A1%5D%22%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20await%20send_code%28client%2C%20%22d%22%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20armed%20%3D%20False%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20cv2.putText%28%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20frame%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20f%22dets%3A%7Bn%7D%20%20armed%3A%7Barmed%7D%20%20%28q%3Dquit%29%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2820%2C%2035%29%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cv2.FONT_HERSHEY_SIMPLEX%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%200.7%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%280%2C%20255%2C%20255%29%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%202%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%29%0A%20%20%20%20%20%20%20%20%20%20%20%20cv2.imshow%28%22detect%20-%3E%20A%20motor%20spin%20%28q%3Dquit%29%22%2C%20frame%29%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20cv2.waitKey%281%29%20%26%200xFF%20%3D%3D%20ord%28%22q%22%29%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20break%0A%0A%20%20%20%20%20%20%20%20cap.release%28%29%0A%20%20%20%20%20%20%20%20cv2.destroyAllWindows%28%29%0A%0A%20%20%20%20%20%20%20%20print%28%22%EC%A2%85%EB%A3%8C%20%EC%BD%94%EB%93%9C%20%EC%A0%84%EC%86%A1%22%29%0A%20%20%20%20%20%20%20%20await%20send_code%28client%2C%20%22q%22%29%0A%0A%0Aif%20__name__%20%3D%3D%20%22__main__%22%3A%0A%20%20%20%20if%20sys.platform%20%3D%3D%20%22win32%22%3A%0A%20%20%20%20%20%20%20%20asyncio.set_event_loop_policy%28asyncio.WindowsSelectorEventLoopPolicy%28%29%29%0A%0A%20%20%20%20with%20suppress%28asyncio.CancelledError%29%3A%0A%20%20%20%20%20%20%20%20asyncio.run%28main%28%29%29%0A">다운로드</a><button class="dl-btn dl-copy" data-file="detect_spin_a.py">복사</button></div></div>
+      <div class="dl-item"><div class="dl-meta"><b>find_camera.py</b><span>카메라 번호 찾기 도우미</span></div><div class="dl-actions"><a class="dl-btn" download="find_camera.py" href="data:text/plain;charset=utf-8,%22%22%22%0A%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%9D%B8%EB%8D%B1%EC%8A%A4%20%EC%B0%BE%EA%B8%B0%20%EB%8F%84%EC%9A%B0%EB%AF%B8.%0A%0AmacOS%20%EC%97%B0%EC%86%8D%EC%84%B1%20%EC%B9%B4%EB%A9%94%EB%9D%BC%28iPhone%29%EA%B0%80%20%EB%AA%87%20%EB%B2%88%20%EC%9D%B8%EB%8D%B1%EC%8A%A4%EC%9D%B8%EC%A7%80%20%ED%99%95%EC%9D%B8%ED%95%98%EB%8A%94%20%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8.%0A1%29%20AVFoundation%EC%9D%B4%20%EC%9D%B8%EC%8B%9D%ED%95%9C%20%EC%8B%A4%EC%A0%9C%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%9D%B4%EB%A6%84%20%2B%20%EC%9D%B8%EB%8D%B1%EC%8A%A4%20%ED%91%9C%EB%A5%BC%20%EB%A8%BC%EC%A0%80%20%EC%B6%9C%EB%A0%A5%ED%95%98%EA%B3%A0%2C%0A2%29%20%EA%B0%81%20%EC%9D%B8%EB%8D%B1%EC%8A%A4%EB%A5%BC%20%ED%95%98%EB%82%98%EC%94%A9%20%EC%97%B4%EC%96%B4%20%EB%AF%B8%EB%A6%AC%EB%B3%B4%EA%B8%B0%20%EC%B0%BD%EC%9D%84%20%EB%9D%84%EC%9A%B4%EB%8B%A4.%0A%0A%EC%82%AC%EC%9A%A9%EB%B2%95%3A%0A%20%20%20%20python%20find_camera.py%0A%0A%EC%A1%B0%EC%9E%91%28%EB%AF%B8%EB%A6%AC%EB%B3%B4%EA%B8%B0%20%EC%B0%BD%EC%97%90%EC%84%9C%29%3A%0A%20%20%20%20n%20%20%E2%86%92%20%EB%8B%A4%EC%9D%8C%20%EC%B9%B4%EB%A9%94%EB%9D%BC%EB%A1%9C%0A%20%20%20%20s%20%20%E2%86%92%20%EC%A7%80%EA%B8%88%20%EC%9D%B8%EB%8D%B1%EC%8A%A4%EB%A5%BC%20VIDEO_SOURCE%20%EA%B0%92%EC%9C%BC%EB%A1%9C%20%EC%B6%9C%EB%A0%A5%ED%95%98%EA%B3%A0%20%EC%A2%85%EB%A3%8C%0A%20%20%20%20q%20%20%E2%86%92%20%EA%B7%B8%EB%83%A5%20%EC%A2%85%EB%A3%8C%0A%0A%EC%A3%BC%EC%9D%98%3A%0A%20%20%20%20-%20%EC%B2%98%EC%9D%8C%20%EC%8B%A4%ED%96%89%20%EC%8B%9C%20macOS%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EA%B6%8C%ED%95%9C%20%ED%8C%9D%EC%97%85%EC%9D%B4%20%EB%9C%A8%EB%A9%B4%20%27%ED%97%88%EC%9A%A9%27.%0A%20%20%20%20%20%20%28%EC%8B%9C%EC%8A%A4%ED%85%9C%20%EC%84%A4%EC%A0%95%20%3E%20%EA%B0%9C%EC%9D%B8%EC%A0%95%EB%B3%B4%20%EB%B3%B4%ED%98%B8%20%EB%B0%8F%20%EB%B3%B4%EC%95%88%20%3E%20%EC%B9%B4%EB%A9%94%EB%9D%BC%29%0A%20%20%20%20-%20iPhone%EC%9D%80%20%27%EC%9E%A0%EA%B8%88%20%2B%20%EA%B1%B0%EC%B9%98%20%EA%B3%A0%EC%A0%95%20%2B%20%ED%9B%84%EB%A9%B4%20%EC%B9%B4%EB%A9%94%EB%9D%BC%EA%B0%80%20%EB%8C%80%EC%83%81%27%20%EC%83%81%ED%83%9C%EC%97%AC%EC%95%BC%0A%20%20%20%20%20%20%EC%97%B0%EC%86%8D%EC%84%B1%20%EC%B9%B4%EB%A9%94%EB%9D%BC%EB%A1%9C%20%EC%9E%A1%ED%9E%8C%EB%8B%A4.%20%EC%86%90%EC%97%90%20%EB%93%A4%EA%B1%B0%EB%82%98%20%EC%9E%A0%EA%B8%88%20%ED%95%B4%EC%A0%9C%ED%95%98%EB%A9%B4%20%EB%82%B4%EC%9E%A5%EC%BA%A0%EC%9C%BC%EB%A1%9C%20%ED%8F%B4%EB%B0%B1%EB%90%9C%EB%8B%A4.%0A%22%22%22%0A%0Aimport%20sys%0Aimport%20cv2%0A%0AMAX_INDEX%20%3D%206%0A%0A%0Adef%20print_avf_devices%28%29%3A%0A%20%20%20%20%22%22%22AVFoundation%EC%9D%B4%20%EB%B3%B4%EB%8A%94%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%9D%B4%EB%A6%84%20%EB%AA%A9%EB%A1%9D%EC%9D%84%20%EC%9D%B8%EB%8D%B1%EC%8A%A4%EC%99%80%20%ED%95%A8%EA%BB%98%20%EC%B6%9C%EB%A0%A5%28%EA%B0%80%EB%8A%A5%ED%95%A0%20%EB%95%8C%EB%A7%8C%29.%22%22%22%0A%20%20%20%20try%3A%0A%20%20%20%20%20%20%20%20import%20AVFoundation%20as%20AVF%0A%20%20%20%20except%20Exception%3A%0A%20%20%20%20%20%20%20%20print%28%22%28AVFoundation%20%EB%AA%A9%EB%A1%9D%20%EC%A1%B0%ED%9A%8C%20%EB%B6%88%EA%B0%80%20%E2%80%94%20%EB%AF%B8%EB%A6%AC%EB%B3%B4%EA%B8%B0%EB%A1%9C%EB%A7%8C%20%ED%99%95%EC%9D%B8%ED%95%98%EC%84%B8%EC%9A%94%29%5Cn%22%29%0A%20%20%20%20%20%20%20%20return%0A%0A%20%20%20%20try%3A%0A%20%20%20%20%20%20%20%20devs%20%3D%20AVF.AVCaptureDevice.devicesWithMediaType_%28AVF.AVMediaTypeVideo%29%0A%20%20%20%20except%20Exception%3A%0A%20%20%20%20%20%20%20%20devs%20%3D%20None%0A%0A%20%20%20%20print%28%22%3D%3D%3D%20macOS%EA%B0%80%20%EC%9D%B8%EC%8B%9D%ED%95%9C%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%28%EB%B3%B4%ED%86%B5%20%EC%9D%B4%20%EC%88%9C%EC%84%9C%20%3D%20OpenCV%20%EC%9D%B8%EB%8D%B1%EC%8A%A4%29%20%3D%3D%3D%22%29%0A%20%20%20%20if%20not%20devs%3A%0A%20%20%20%20%20%20%20%20print%28%22%20%20%28%EC%97%86%EC%9D%8C%29%20iPhone%EC%9D%B4%20%EC%97%B0%EC%86%8D%EC%84%B1%20%EC%B9%B4%EB%A9%94%EB%9D%BC%EB%A1%9C%20%EC%86%A1%EC%B6%9C%20%EC%A4%91%EC%9D%B8%EC%A7%80%20%ED%99%95%EC%9D%B8%ED%95%98%EC%84%B8%EC%9A%94.%22%29%0A%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20for%20i%2C%20d%20in%20enumerate%28devs%29%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20print%28f%22%20%20index%20%7Bi%7D%3A%20%7Bd.localizedName%28%29%7D%22%29%0A%20%20%20%20print%28%29%0A%0A%0Adef%20make_cap%28idx%29%3A%0A%20%20%20%20if%20sys.platform%20%3D%3D%20%22darwin%22%3A%0A%20%20%20%20%20%20%20%20return%20cv2.VideoCapture%28idx%2C%20cv2.CAP_AVFOUNDATION%29%0A%20%20%20%20return%20cv2.VideoCapture%28idx%29%0A%0A%0Adef%20main%28%29%3A%0A%20%20%20%20print_avf_devices%28%29%0A%0A%20%20%20%20found%20%3D%20%5B%5D%0A%0A%20%20%20%20for%20idx%20in%20range%28MAX_INDEX%29%3A%0A%20%20%20%20%20%20%20%20cap%20%3D%20make_cap%28idx%29%0A%0A%20%20%20%20%20%20%20%20if%20not%20cap.isOpened%28%29%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20cap.release%28%29%0A%20%20%20%20%20%20%20%20%20%20%20%20continue%0A%0A%20%20%20%20%20%20%20%20ok%20%3D%20False%0A%20%20%20%20%20%20%20%20frame%20%3D%20None%0A%20%20%20%20%20%20%20%20for%20_%20in%20range%2810%29%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20ok%2C%20frame%20%3D%20cap.read%28%29%0A%0A%20%20%20%20%20%20%20%20if%20not%20ok%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20cap.release%28%29%0A%20%20%20%20%20%20%20%20%20%20%20%20continue%0A%0A%20%20%20%20%20%20%20%20w%20%3D%20int%28cap.get%28cv2.CAP_PROP_FRAME_WIDTH%29%29%0A%20%20%20%20%20%20%20%20h%20%3D%20int%28cap.get%28cv2.CAP_PROP_FRAME_HEIGHT%29%29%0A%20%20%20%20%20%20%20%20print%28f%22index%20%7Bidx%7D%3A%20%EC%97%B4%EB%A6%BC%20%7Bw%7Dx%7Bh%7D%20%20-%3E%20iPhone%20%ED%99%94%EB%A9%B4%EC%9D%B4%EB%A9%B4%20s%2C%20%EC%95%84%EB%8B%88%EB%A9%B4%20n%22%29%0A%20%20%20%20%20%20%20%20found.append%28idx%29%0A%0A%20%20%20%20%20%20%20%20while%20True%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20ok%2C%20frame%20%3D%20cap.read%28%29%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20not%20ok%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20break%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20cv2.putText%28%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20frame%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20f%22index%20%7Bidx%7D%20%20%7Bw%7Dx%7Bh%7D%20%20%28n%3Dnext%2C%20s%3Dselect%2C%20q%3Dquit%29%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2820%2C%2040%29%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cv2.FONT_HERSHEY_SIMPLEX%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%200.8%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%280%2C%20255%2C%200%29%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%202%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%29%0A%20%20%20%20%20%20%20%20%20%20%20%20cv2.imshow%28%22find_camera%22%2C%20frame%29%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20key%20%3D%20cv2.waitKey%281%29%20%26%200xFF%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20key%20%3D%3D%20ord%28%22n%22%29%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20break%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20key%20%3D%3D%20ord%28%22s%22%29%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cap.release%28%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cv2.destroyAllWindows%28%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20print%28%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20print%28f%22%5B%EC%84%A0%ED%83%9D%EB%90%A8%5D%20index%20%7Bidx%7D%22%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20print%28%22balldetection_1.py%20%EC%97%90%EC%84%9C%20%EB%8B%A4%EC%9D%8C%EC%B2%98%EB%9F%BC%20%EC%84%A4%EC%A0%95%ED%95%98%EC%84%B8%EC%9A%94%3A%22%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20print%28f%22%20%20%20%20VIDEO_SOURCE%20%3D%20%7Bidx%7D%22%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20return%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20key%20%3D%3D%20ord%28%22q%22%29%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cap.release%28%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cv2.destroyAllWindows%28%29%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20return%0A%0A%20%20%20%20%20%20%20%20cap.release%28%29%0A%0A%20%20%20%20cv2.destroyAllWindows%28%29%0A%0A%20%20%20%20if%20not%20found%3A%0A%20%20%20%20%20%20%20%20print%28%22%EC%97%B4%EB%A6%AC%EB%8A%94%20%EC%B9%B4%EB%A9%94%EB%9D%BC%EA%B0%80%20%EC%97%86%EC%8A%B5%EB%8B%88%EB%8B%A4.%22%29%0A%20%20%20%20%20%20%20%20print%28%22%20%20-%20iPhone%3A%20%EC%97%B0%EC%86%8D%EC%84%B1%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20ON%20%2B%20%EC%9E%A0%EA%B8%88%20%2B%20%EA%B1%B0%EC%B9%98%20%EA%B3%A0%EC%A0%95%20%2B%20%EA%B0%99%EC%9D%80%20Apple%20ID%20%2B%20WiFi%2FBT%20ON%22%29%0A%20%20%20%20%20%20%20%20print%28%22%20%20-%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EA%B6%8C%ED%95%9C%20%ED%97%88%EC%9A%A9%20%ED%9B%84%20%EC%95%B1%28%ED%84%B0%EB%AF%B8%EB%84%90%2FVSCode%29%20%EC%9E%AC%EC%8B%9C%EC%9E%91%22%29%0A%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20print%28f%22%EC%97%B4%EB%A6%B0%20%EC%9D%B8%EB%8D%B1%EC%8A%A4%3A%20%7Bfound%7D%22%29%0A%0A%0Aif%20__name__%20%3D%3D%20%22__main__%22%3A%0A%20%20%20%20main%28%29%0A">다운로드</a><button class="dl-btn dl-copy" data-file="find_camera.py">복사</button></div></div>
+      <div class="dl-item"><div class="dl-meta"><b>requirements.txt</b><span>필수 패키지 목록</span></div><div class="dl-actions"><a class="dl-btn" download="requirements.txt" href="data:text/plain;charset=utf-8,%23%20%EB%A0%88%EA%B3%A0%20AI%20%EC%8B%A4%EC%8A%B5%20%ED%95%84%EC%88%98%20%ED%8C%A8%ED%82%A4%EC%A7%80%0A%23%20%EC%84%A4%EC%B9%98%3A%20pip%20install%20-r%20requirements.txt%0Aultralytics%20%20%20%20%23%20YOLO%20%EA%B3%B5%20%ED%83%90%EC%A7%80%20%28PyTorch%20%ED%8F%AC%ED%95%A8%2C%20%EC%9A%A9%EB%9F%89%20%ED%81%BC%29%0Aopencv-python%20%20%23%20%EC%B9%B4%EB%A9%94%EB%9D%BC%20%EC%97%B4%EA%B8%B0%20%2B%20%ED%99%94%EB%A9%B4%20%ED%91%9C%EC%8B%9C%0Ableak%20%20%20%20%20%20%20%20%20%20%23%20%ED%97%88%EB%B8%8C%20%EB%B8%94%EB%A3%A8%ED%88%AC%EC%8A%A4%20%ED%86%B5%EC%8B%A0%0A">다운로드</a><button class="dl-btn dl-copy" data-file="requirements.txt">복사</button></div></div>
+    </div>
+    <div class="note">"다운로드"가 안 되는 환경(일부 브라우저·보안 설정)에서는 <b>"복사"</b>를 누른 뒤, VS Code에서 <b>새 파일 → 붙여넣기 → 같은 이름으로 저장</b>하면 똑같습니다.</div>
+    <div class="warn"><b>best.pt</b>(공을 알아보는 AI 모델, 6MB)는 용량 때문에 여기엔 없어요. <b>선생님이 USB로 나눠줍니다</b> — 같은 폴더에 꼭 넣으세요. 이 파일이 없으면 연습 2부터 실행이 안 됩니다.</div>
+  </section>
+
+  <!-- ================= STAGE 1 ================= -->
+  <section class="stage">
+    <div class="stage-head">
+      <div class="stage-num">1</div>
+      <h2>파이썬 설치하기</h2>
+      <span class="badge once">처음 한 번만</span>
+    </div>
+    <ol>
+      <li><b>python.org</b>에 접속해서 노란 <b>Download Python</b> 버튼을 누르고 설치 파일을 실행합니다.</li>
+      <li>설치 첫 화면 맨 아래 <b>“Add python.exe to PATH”</b> 체크박스를 <b>반드시 체크</b>하고 Install Now를 누릅니다.</li>
+      <li>설치가 끝나면 <b>명령 프롬프트</b>를 엽니다. (⊞ 윈도우 키 → <code>cmd</code> 입력 → Enter)</li>
+      <li>아래 명령을 한 줄씩 붙여넣고 Enter. 두 번째 줄은 AI 라이브러리를 내려받느라 몇 분 걸립니다.</li>
+    </ol>
+    <div class="cmd"><button class="copy-btn" data-copy="python --version">복사</button><span class="prompt">&gt; </span>python --version</div>
+    <div class="cmd"><button class="copy-btn" data-copy="pip install ultralytics opencv-python bleak">복사</button><span class="prompt">&gt; </span>pip install ultralytics opencv-python bleak</div>
+    <div class="check"><b>확인 포인트</b> — <code>python --version</code>을 쳤을 때 <b>Python 3.11</b> 같은 버전 숫자가 나오면 성공. “내부 또는 외부 명령이 아닙니다”가 나오면 2번의 PATH 체크를 빼먹은 것이니 다시 설치하세요.</div>
+  </section>
+
+  <!-- ================= STAGE 2 ================= -->
+  <section class="stage">
+    <div class="stage-head">
+      <div class="stage-num">2</div>
+      <h2>폰을 무선 카메라로 만들기</h2>
+      <span class="badge once">처음 한 번만</span>
+    </div>
+    <p><b>Iriun Webcam</b>이라는 무료 앱을 쓰면 폰 카메라 화면이 WiFi를 타고 노트북으로 들어옵니다.</p>
+    <ol>
+      <li><b>폰에서</b>: 앱스토어/플레이스토어에서 <b>Iriun Webcam</b>을 설치합니다.</li>
+      <li><b>노트북에서</b>: <b>iriun.com</b>에 접속해 Windows용 프로그램을 내려받아 설치합니다.</li>
+      <li>둘 다 실행하면 (같은 WiFi일 때) 자동으로 연결되고, 노트북 Iriun 창에 폰 카메라 화면이 뜹니다.</li>
+      <li>폰은 공이 잘 보이는 위치에 거치대로 고정합니다. 실습 중엔 폰 화면이 꺼지지 않게 두세요.</li>
+    </ol>
+    <div class="warn">학교 WiFi는 기기끼리 통신을 막아둔 경우가 있어요. 연결이 안 되면 <b>폰의 핫스팟을 켜고 노트북을 그 핫스팟에 연결</b>하면 됩니다.</div>
+    <div class="check"><b>확인 포인트</b> — 노트북의 Iriun 창에 폰 카메라 화면이 실시간으로 보이면 성공.</div>
+  </section>
+
+  <!-- ================= STAGE 3 ================= -->
+  <section class="stage">
+    <div class="stage-head">
+      <div class="stage-num">3</div>
+      <h2>허브에 Pybricks 펌웨어 설치</h2>
+      <span class="badge once">처음 한 번만</span>
+    </div>
+    <p>허브 속 운영체제를 파이썬을 알아듣는 <b>Pybricks</b>로 갈아끼우는 단계입니다. 허브마다 딱 한 번만 하면 됩니다.</p>
+    <ol>
+      <li>Chrome(또는 Edge)에서 <b>code.pybricks.com</b>에 접속합니다.</li>
+      <li>왼쪽 <b>톱니바퀴(설정)</b> → <b>Install Pybricks Firmware</b>를 누릅니다.</li>
+      <li>허브 종류에서 <b>SPIKE Prime</b>을 고르고, 허브 이름은 <b>팀 이름</b>으로 정합니다. (예: <code>HUB-1조</code>)</li>
+      <li>화면이 “업데이트 모드로 전환하세요”라고 하면, 아래 순서대로 합니다:
+        <ol type="a">
+          <li>USB를 뽑고 허브 전원을 완전히 끕니다.</li>
+          <li>허브의 <b>블루투스 버튼을 누른 채</b> USB 케이블을 노트북에 꽂습니다.</li>
+          <li>불빛이 <b>빨강→초록→파랑 무지개색으로 깜빡일 때까지</b> 계속 누르고 있습니다.</li>
+        </ol>
+      </li>
+      <li>브라우저 팝업에 <b>LEGO Bootloader</b> 장치가 나타나면 선택 → 연결 → 설치가 진행됩니다.</li>
+    </ol>
+    <div class="warn"><b>“호환되는 기기가 없습니다”</b>가 나오면 허브가 아직 업데이트 모드가 아닌 거예요. 4번을 처음부터 다시. 그래도 안 되면 USB 케이블을 다른 것으로 바꿔보세요 (충전 전용 케이블은 데이터가 안 통합니다).</div>
+    <div class="note">나중에 레고 공식 앱으로 되돌리고 싶으면 같은 설정 메뉴의 <b>Restore Official LEGO Firmware</b>를 누르면 됩니다. 망가지는 것 아니니 걱정 마세요.</div>
+    <div class="check"><b>확인 포인트</b> — 설치 진행 바가 100%까지 가고 허브가 다시 켜지면 성공.</div>
+  </section>
+
+  <!-- ================= STAGE 4 ================= -->
+  <section class="stage">
+    <div class="stage-head">
+      <div class="stage-num">4</div>
+      <h2>허브에 모터 프로그램 넣기</h2>
+      <span class="badge once">처음 한 번만</span>
+    </div>
+    <ol>
+      <li><b>모터를 허브의 A 포트에 꽂습니다.</b> (제일 많이 까먹는 부분!)</li>
+      <li><b>code.pybricks.com</b>에서 <b>블루투스 아이콘</b>을 눌러 내 팀 허브에 연결합니다.</li>
+      <li>파일 목록 옆 <b>+</b> 버튼으로 새 파일을 만들고, 실습 폴더의 <code>spike_hub_a_once.py</code> 내용을 전부 복사해 붙여넣습니다. (아래에도 전체 코드가 있어요.)</li>
+      <li>위쪽 <b>▶ (실행)</b> 버튼을 누릅니다. 코드가 허브에 저장되면서 바로 실행됩니다.</li>
+    </ol>
+    <details>
+      <summary>spike_hub_a_once.py 전체 코드 (펼쳐서 복사)</summary>
+      <pre>from pybricks.hubs import PrimeHub
+from pybricks.pupdevices import Motor
+from pybricks.parameters import Port, Color
+from pybricks.tools import wait
+
+from usys import stdin, stdout
+from uselect import poll
+
+hub = PrimeHub()
+
+PORT_A = Port.A
+
+SPIN_SPEED = 500   # 회전 속도 (deg/s)
+SPIN_ANGLE = 360   # 1회전
+
+def try_motor(port, name):
+    try:
+        m = Motor(port)
+        print(name, "OK")
+        return m
+    except Exception:
+        print(name, "NOT FOUND")
+        return None
+
+def send(msg):
+    stdout.buffer.write(msg)
+
+A = try_motor(PORT_A, "A")
+
+keyboard = poll()
+keyboard.register(stdin)
+
+hub.light.on(Color.GREEN)
+send(b"rdy")
+
+while True:
+    if keyboard.poll(0):
+        cmd = stdin.buffer.read(1)
+        if not cmd:
+            continue
+
+        if cmd == b"q":
+            break
+
+        if cmd == b"d":
+            hub.display.char("d")
+            if A is not None:
+                A.run_angle(SPIN_SPEED, SPIN_ANGLE)
+
+        send(b"rdy")
+    else:
+        wait(10)
+
+if A is not None:
+    A.stop()
+hub.light.on(Color.RED)
+hub.display.off()</pre>
+    </details>
+    <div class="check"><b>확인 포인트</b> — 화면 아래 콘솔에 <b><code>A OK</code></b>와 <b><code>rdy</code></b>가 찍히면 성공. <code>A NOT FOUND</code>가 나오면 모터 케이블이 A 포트에 안 꽂힌 거예요.</div>
+  </section>
+
+  <!-- ================= 허브 불빛 사전 ================= -->
+  <section class="stage">
+    <div class="stage-head">
+      <div class="stage-num" style="background:var(--ink); color:var(--yellow)">★</div>
+      <h2>허브 불빛 읽는 법</h2>
+    </div>
+    <p>다음 단계부터는 <b>허브 가운데 버튼의 불빛 색</b>이 지금 뭘 해야 하는지 알려주는 신호등입니다. 이것만 알면 절대 안 헤맵니다.</p>
+    <div class="lights">
+      <span class="dot blue"></span><div><b>파란색 깜빡임</b> <span>— 연결 기다리는 중. 노트북이 허브를 찾을 수 있는 <b>유일한</b> 상태.</span></div>
+      <span class="dot green"></span><div><b>초록색</b> <span>— 프로그램 실행 중. 모터가 신호를 받을 수 있는 상태. 단, 이때는 노트북이 새로 연결할 수 없음.</span></div>
+      <span class="dot red"></span><div><b>빨간색</b> <span>— 프로그램이 끝난 상태. 가운데 버튼을 누르면 다시 시작.</span></div>
+    </div>
+    <div class="warn">핵심 규칙: <b>허브는 한 번에 한 곳하고만 연결됩니다.</b> Pybricks 브라우저 탭이 열려 있으면 노트북 프로그램이 허브를 못 찾아요. 실행 전엔 <b>브라우저 탭을 완전히 닫는 것</b>이 규칙입니다.</div>
+  </section>
+
+  <!-- ================= STAGE 5 ================= -->
+  <section class="stage">
+    <div class="stage-head">
+      <div class="stage-num">5</div>
+      <h2>실행하기 — 순서가 생명!</h2>
+      <span class="badge every">실행할 때마다</span>
+    </div>
+    <p>여기서부터가 진짜입니다. <b>순서를 지키는 것</b>이 성공의 90%입니다.</p>
+    <ul class="timeline">
+      <li data-n="1">
+        <b>Pybricks 브라우저 탭을 완전히 닫기</b>
+        <span class="tl-sub">탭이 열려 있으면 허브를 독차지해서 다음 단계가 안 됩니다.</span>
+      </li>
+      <li data-n="2">
+        <b>허브를 <span class="light-tag"><span class="dot blue"></span>파란 깜빡임</span> 상태로 만들기</b>
+        <span class="tl-sub">초록불이면 가운데 버튼을 한 번 눌러 프로그램을 멈추세요. 꺼져 있으면 켜세요.</span>
+      </li>
+      <li data-n="3">
+        <b>Iriun 켜기 (폰 앱 + 노트북 프로그램)</b>
+        <span class="tl-sub">노트북 Iriun 창에 폰 화면이 보이는지 확인.</span>
+      </li>
+      <li data-n="4">
+        <b>명령 프롬프트에서 탐지 프로그램 실행</b>
+        <div class="cmd" style="margin:10px 0 4px"><button class="copy-btn" data-copy="cd Desktop\레고실습
+python detect_spin_a.py">복사</button><span class="prompt">&gt; </span>cd Desktop\레고실습
+<span class="prompt">&gt; </span>python detect_spin_a.py</div>
+        <span class="tl-sub">“허브 찾음” → 카메라 창이 뜰 때까지 기다립니다 (첫 실행은 1분쯤 걸려요).</span>
+      </li>
+      <li data-n="5">
+        <b>카메라 창이 뜨면 → 허브 가운데 버튼을 눌러 <span class="light-tag"><span class="dot green"></span>초록불</span> 만들기</b>
+        <span class="tl-sub">이제 허브가 신호를 받을 준비 완료.</span>
+      </li>
+      <li data-n="6">
+        <b>공을 카메라에 보여주기 → 모터가 한 바퀴 돕니다!</b>
+        <span class="tl-sub">화면에 초록 상자와 공 이름(red_normal 등)이 뜨고, 모터가 돌면 성공. 공을 치웠다가 다시 보여주면 또 돕니다.</span>
+      </li>
+      <li data-n="7">
+        <b>끝낼 때는 카메라 창을 클릭하고 <code>q</code> 키</b>
+        <span class="tl-sub">허브도 자동으로 정리되고 빨간불이 됩니다.</span>
+      </li>
+    </ul>
+    <div class="check"><b>최종 확인</b> — 공을 보여줄 때마다 검은 명령 창에 <code>[전송 완료] code=d</code>가 찍히고 모터가 한 바퀴 돌면, 오늘의 미션 완료입니다. 축하해요! 🎉</div>
+  </section>
+
+  <!-- ================= STAGE 6 : baseline ================= -->
+  <section class="stage">
+    <div class="stage-head">
+      <div class="stage-num">6</div>
+      <h2>VS Code에서 단계별 연습 (baseline 코드)</h2>
+      <span class="badge once">연습용</span>
+    </div>
+    <p>한 번에 다 하려면 어디서 막혔는지 알 수 없어요. 그래서 <b>3개의 연습 코드</b>를 준비했습니다. 1번부터 차례로 성공시키면, 마지막엔 자동으로 전체가 완성됩니다.</p>
+
+    <h3>VS Code로 실행하는 법</h3>
+    <ol>
+      <li><b>code.visualstudio.com</b>에서 VS Code를 설치합니다.</li>
+      <li>왼쪽 블록 모양 아이콘(확장)에서 <b>Python</b>을 검색해 설치합니다.</li>
+      <li>메뉴 <b>파일 → 폴더 열기</b>로 바탕화면의 <code>레고실습</code> 폴더를 엽니다.</li>
+      <li>실행할 파일을 클릭해 열고, <b>오른쪽 위 ▶ 버튼</b>을 누르면 아래 터미널에서 실행됩니다.</li>
+    </ol>
+
+    <h3>연습 1 — 카메라 연결 <code>baseline_1_camera.py</code></h3>
+    <p style="font-size:15px; color:var(--muted); margin-top:4px">폰 카메라 화면을 노트북 창에 띄우는 것이 전부인 코드. 여기서 <code>VIDEO_SOURCE</code> 숫자를 찾아두면 뒤 단계가 편해집니다.</p>
+    <details>
+      <summary>baseline_1_camera.py 전체 코드</summary>
+      <pre>"""
+[baseline 1단계] 휴대폰 카메라 연결 테스트
+
+목표: 폰 카메라 화면이 노트북 창에 나오면 성공!
+실행 전: Iriun 앱(폰) + Iriun 프로그램(노트북)이 켜져 있어야 합니다.
+종료: 카메라 창을 클릭하고 q 키
+"""
+
+import sys
+
+import cv2
+
+# 폰 카메라 번호. 내 얼굴(노트북 내장캠)이 나오면 0, 1, 2로 바꿔보세요.
+VIDEO_SOURCE = 1
+
+if sys.platform == "darwin":  # 맥에서 테스트할 때용 (Windows는 아래 줄로 실행됨)
+    cap = cv2.VideoCapture(VIDEO_SOURCE, cv2.CAP_AVFOUNDATION)
+else:
+    cap = cv2.VideoCapture(VIDEO_SOURCE)
+
+if not cap.isOpened():
+    print("카메라를 열 수 없습니다. VIDEO_SOURCE 숫자를 바꿔서 다시 실행해 보세요.")
+    raise SystemExit
+
+print("카메라 열림! 폰 화면이 나오는지 확인하세요. (q = 종료)")
+
+while True:
+    ok, frame = cap.read()
+    if not ok:
+        continue
+
+    cv2.imshow("1. camera test (q=quit)", frame)
+
+    if cv2.waitKey(1) &amp; 0xFF == ord("q"):
+        break
+
+cap.release()
+cv2.destroyAllWindows()</pre>
+    </details>
+    <div class="check"><b>성공 기준</b> — 창에 폰 카메라 화면이 실시간으로 나온다. (내 얼굴이 나오면 <code>VIDEO_SOURCE</code>를 0, 1, 2로 바꿔가며 재실행)</div>
+
+    <h3>연습 2 — AI 탐지 <code>baseline_2_vision.py</code></h3>
+    <p style="font-size:15px; color:var(--muted); margin-top:4px">연습 1에 AI 모델(<code>best.pt</code>)을 얹은 코드. 모터 없이 "AI가 공을 알아보는지"만 확인합니다.</p>
+    <details>
+      <summary>baseline_2_vision.py 전체 코드</summary>
+      <pre>"""
+[baseline 2단계] AI 공 탐지 테스트 (모터 없이 눈으로만 확인)
+
+목표: 공을 비추면 초록 상자 + 공 이름 + 점수가 뜨면 성공!
+실행 전: baseline_1이 성공했어야 합니다. best.pt 파일이 같은 폴더에 있어야 합니다.
+종료: 카메라 창을 클릭하고 q 키
+"""
+
+import sys
+
+import cv2
+from ultralytics import YOLO
+
+VIDEO_SOURCE = 1   # baseline_1에서 성공한 번호와 같게
+CONF = 0.5         # 탐지 기준 점수(0~1). 공이 잘 안 잡히면 0.3으로 낮춰보세요.
+
+print("AI 모델 로딩 중... (조금 걸려요)")
+model = YOLO("best.pt")
+print("이 AI가 알아보는 것들:", list(model.names.values()))
+
+if sys.platform == "darwin":
+    cap = cv2.VideoCapture(VIDEO_SOURCE, cv2.CAP_AVFOUNDATION)
+else:
+    cap = cv2.VideoCapture(VIDEO_SOURCE)
+
+if not cap.isOpened():
+    print("카메라를 열 수 없습니다. VIDEO_SOURCE 숫자를 확인하세요.")
+    raise SystemExit
+
+print("탐지 시작! 공을 카메라에 보여주세요. (q = 종료)")
+
+while True:
+    ok, frame = cap.read()
+    if not ok:
+        continue
+
+    # AI에게 이 화면에 공이 있는지 물어본다
+    r = model.predict(frame, conf=CONF, verbose=False)[0]
+
+    # 찾은 공마다 초록 상자를 그린다
+    for box in r.boxes:
+        x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
+        label = model.names[int(box.cls[0])]      # 공 이름 (red_normal 등)
+        conf = float(box.conf[0])                 # AI의 확신 정도 (0~1)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.putText(frame, f"{label} {conf:.2f}", (x1, max(30, y1 - 10)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+
+    cv2.imshow("2. vision test (q=quit)", frame)
+
+    if cv2.waitKey(1) &amp; 0xFF == ord("q"):
+        break
+
+cap.release()
+cv2.destroyAllWindows()</pre>
+    </details>
+    <div class="check"><b>성공 기준</b> — 공을 비추면 초록 상자와 이름(<code>red_normal 0.87</code> 같은)이 따라다닌다.</div>
+
+    <h3>연습 3 — 탐지 → 모터 <code>baseline_3_motor.py</code></h3>
+    <p style="font-size:15px; color:var(--muted); margin-top:4px">연습 2에 블루투스로 허브에 신호 보내기를 얹은 최종 코드. 실행 전에 <b>5단계의 순서 규칙</b>(탭 닫기 → 파란 깜빡임)을 지켜야 합니다.</p>
+    <details>
+      <summary>baseline_3_motor.py 전체 코드</summary>
+      <pre>"""
+[baseline 3단계] 공 탐지 → 허브 A모터 1회전 (최종 목표!)
+
+목표: 공을 보여주면 허브의 A모터가 한 바퀴 돌면 성공!
+실행 전:
+  1. baseline_2가 성공했어야 합니다.
+  2. 허브에 spike_hub_a_once.py가 들어있어야 합니다. (가이드 4단계)
+  3. Pybricks 브라우저 탭을 완전히 닫으세요.
+  4. 허브를 "파란 깜빡임" 상태로 만드세요. (초록불이면 버튼 한 번)
+실행 후: 카메라 창이 뜨면 → 허브 가운데 버튼을 눌러 초록불로!
+종료: 카메라 창을 클릭하고 q 키
+"""
+
+import asyncio
+import sys
+
+import cv2
+from ultralytics import YOLO
+from bleak import BleakScanner, BleakClient
+
+HUB_NAME = "Pybricks Hub"   # ★ 우리 팀 허브 이름으로 바꾸세요!
+VIDEO_SOURCE = 1            # baseline_1에서 성공한 번호와 같게
+CONF = 0.5
+
+# 허브와 대화하는 블루투스 주소 (Pybricks 고정값, 바꾸지 마세요)
+PYBRICKS_CHAR = "c5f50002-8280-46da-89f4-6d8051e4aeef"
+
+
+async def main():
+    print("AI 모델 로딩 중...")
+    model = YOLO("best.pt")
+
+    print(f'허브 "{HUB_NAME}" 검색 중... (허브가 파란 깜빡임인지 확인!)')
+    device = None
+    while device is None:
+        device = await BleakScanner.find_device_by_name(HUB_NAME, timeout=10.0)
+        if device is None:
+            print("  아직 못 찾음. 허브를 파란 깜빡임으로 만들면 자동 연결됩니다...")
+
+    async with BleakClient(device) as client:
+        print("허브 연결 완료! 카메라를 엽니다.")
+
+        if sys.platform == "darwin":
+            cap = cv2.VideoCapture(VIDEO_SOURCE, cv2.CAP_AVFOUNDATION)
+        else:
+            cap = cv2.VideoCapture(VIDEO_SOURCE)
+
+        if not cap.isOpened():
+            print("카메라를 열 수 없습니다. VIDEO_SOURCE 숫자를 확인하세요.")
+            return
+
+        seen = 0      # 공이 연속으로 보인 프레임 수
+        empty = 0     # 공이 안 보인 프레임 수
+        armed = True  # True일 때만 모터 신호를 보냄 (공 하나당 딱 1번)
+
+        print("&gt;&gt;&gt; 카메라 창이 뜨면 허브 가운데 버튼을 눌러 초록불로 만드세요! &lt;&lt;&lt;")
+        print("공을 보여주면 모터가 돕니다. (q = 종료)")
+
+        while True:
+            ok, frame = cap.read()
+            if not ok:
+                await asyncio.sleep(0.1)
+                continue
+
+            r = model.predict(frame, conf=CONF, verbose=False)[0]
+
+            for box in r.boxes:
+                x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
+                label = model.names[int(box.cls[0])]
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.putText(frame, label, (x1, max(30, y1 - 10)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+
+            # 공 감지 안정화: 3프레임 연속 보여야 진짜 공으로 인정
+            if len(r.boxes) &gt; 0:
+                seen += 1
+                empty = 0
+            else:
+                seen = 0
+                empty += 1
+                if empty &gt;= 3:
+                    armed = True   # 공이 사라졌으니 다음 공 받을 준비
+
+            if armed and seen &gt;= 3:
+                print("공 감지! → 허브에 모터 1회전 신호 전송")
+                # b"\x06" = "이건 명령이야" 표시, b"d" = 우리가 정한 '돌아라' 신호
+                await client.write_gatt_char(PYBRICKS_CHAR, b"\x06d", response=True)
+                armed = False
+
+            cv2.imshow("3. detect -&gt; motor (q=quit)", frame)
+
+            if cv2.waitKey(1) &amp; 0xFF == ord("q"):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+        print("허브에 종료 신호 전송")
+        await client.write_gatt_char(PYBRICKS_CHAR, b"\x06q", response=True)
+
+
+if __name__ == "__main__":
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    asyncio.run(main())</pre>
+    </details>
+    <div class="check"><b>성공 기준</b> — 공을 보여줄 때마다 터미널에 "공 감지!"가 찍히고 A모터가 한 바퀴 돈다.</div>
+    <div class="note">연습 3까지 성공했다면 <code>detect_spin_a.py</code>(본편 프로그램)도 같은 원리입니다. baseline은 공부용으로 최대한 짧게 만든 코드이고, 본편은 카메라가 잠깐 끊겨도 버티는 안전장치가 더 들어있다는 차이만 있어요.</div>
+  </section>
+
+  <!-- ================= troubleshooting ================= -->
+  <section class="stage">
+    <div class="stage-head">
+      <div class="stage-num" style="background:var(--red-soft); color:var(--red)">?</div>
+      <h2>안 될 때 — 증상별 해결법</h2>
+    </div>
+    <div class="ts">
+      <div class="ts-item">
+        <div class="symptom">“허브를 찾지 못했습니다”가 계속 나온다</div>
+        <div class="fix">십중팔구 허브가 <b>초록불(실행 중)</b>이거나 <b>Pybricks 탭이 열려</b> 있는 경우. 탭을 닫고, 허브 버튼을 눌러 파란 깜빡임으로 만든 뒤 다시 실행하세요. 프로그램이 자동으로 계속 재시도하니, 켜둔 채로 허브만 파란 깜빡임으로 만들어도 됩니다.</div>
+      </div>
+      <div class="ts-item">
+        <div class="symptom">탐지도 되고 “전송 완료”도 뜨는데 모터가 안 돈다</div>
+        <div class="fix">허브가 <b>초록불인지</b> 확인하세요. 파란 깜빡임 상태면 신호를 받아도 실행할 프로그램이 없어서 무시됩니다. 카메라 창이 뜬 <b>다음에</b> 허브 버튼을 누르는 순서를 지키세요.</div>
+      </div>
+      <div class="ts-item">
+        <div class="symptom">카메라 창에 노트북 내장 카메라(내 얼굴)가 나온다</div>
+        <div class="fix"><code>detect_spin_a.py</code>를 메모장으로 열어 <code>VIDEO_SOURCE = 1</code>의 숫자를 0, 1, 2로 바꿔가며 다시 실행해 보세요. 폰 화면이 나오는 숫자가 정답입니다.</div>
+      </div>
+      <div class="ts-item">
+        <div class="symptom">Iriun이 폰을 못 찾는다</div>
+        <div class="fix">폰과 노트북이 <b>같은 WiFi</b>인지 확인. 학교 WiFi에서 안 되면 폰 핫스팟을 켜고 노트북을 거기에 연결하세요.</div>
+      </div>
+      <div class="ts-item">
+        <div class="symptom">Pybricks 콘솔에 “A NOT FOUND”</div>
+        <div class="fix">모터 케이블이 <b>A 포트</b>에 제대로 안 꽂힌 것. 꽂고 ▶를 다시 누르세요.</div>
+      </div>
+      <div class="ts-item">
+        <div class="symptom">공을 보여줘도 초록 상자가 안 뜬다 (탐지 실패)</div>
+        <div class="fix">공을 화면에 <b>크고 또렷하게</b> 나오도록 폰과의 거리를 조절하세요. 조명이 너무 어두워도 안 됩니다.</div>
+      </div>
+      <div class="ts-item">
+        <div class="symptom">“pip은(는) 내부 또는 외부 명령... ”</div>
+        <div class="fix">파이썬 설치 때 “Add python.exe to PATH”를 체크 안 한 것. 파이썬을 지우고 체크해서 다시 설치하세요.</div>
+      </div>
+      <div class="ts-item">
+        <div class="symptom">옆 팀 허브가 반응한다 (!)</div>
+        <div class="fix">허브 이름이 같아서 그래요. 3단계에서 허브 이름을 팀 이름으로 바꾸고, <code>detect_spin_a.py</code>의 <code>HUB_NAME = "Pybricks Hub"</code>도 같은 팀 이름으로 고치세요.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>실습 폴더에 들어있는 파일</b><br>
+    <code>baseline_1_camera.py</code> 연습 1: 카메라 연결 ·
+    <code>baseline_2_vision.py</code> 연습 2: AI 탐지 ·
+    <code>baseline_3_motor.py</code> 연습 3: 탐지→모터 ·
+    <code>spike_hub_a_once.py</code> 허브에 넣는 모터 프로그램 ·
+    <code>best.pt</code> 공을 알아보는 AI 모델 ·
+    <code>detect_spin_a.py</code> 본편 프로그램 (안전장치 포함판) ·
+    <code>find_camera.py</code> 카메라 번호 찾기 도우미</p>
+    <p>고색고등학교 레고 AI 실습 · 문제가 생기면 손 들고 선생님을 부르세요.</p>
+  </footer>
+</div>
+
+<script>
+  document.querySelectorAll(".copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      navigator.clipboard.writeText(btn.getAttribute("data-copy")).then(function () {
+        var old = btn.textContent;
+        btn.textContent = "복사됨!";
+        setTimeout(function () { btn.textContent = old; }, 1500);
+      });
+    });
+  });
+</script>
+<script type="text/plain" id="src-baseline_1_camera.py">
+"""
+[baseline 1단계] 휴대폰 카메라 연결 테스트
+
+목표: 폰 카메라 화면이 노트북 창에 나오면 성공!
+실행 전: Iriun 앱(폰) + Iriun 프로그램(노트북)이 켜져 있어야 합니다.
+종료: 카메라 창을 클릭하고 q 키
+"""
+
+import sys
+
+import cv2
+
+# 폰 카메라 번호. 내 얼굴(노트북 내장캠)이 나오면 0, 1, 2로 바꿔보세요.
+VIDEO_SOURCE = 1
+
+if sys.platform == "darwin":  # 맥에서 테스트할 때용 (Windows는 아래 줄로 실행됨)
+    cap = cv2.VideoCapture(VIDEO_SOURCE, cv2.CAP_AVFOUNDATION)
+else:
+    cap = cv2.VideoCapture(VIDEO_SOURCE)
+
+if not cap.isOpened():
+    print("카메라를 열 수 없습니다. VIDEO_SOURCE 숫자를 바꿔서 다시 실행해 보세요.")
+    raise SystemExit
+
+print("카메라 열림! 폰 화면이 나오는지 확인하세요. (q = 종료)")
+
+while True:
+    ok, frame = cap.read()
+    if not ok:
+        continue
+
+    cv2.imshow("1. camera test (q=quit)", frame)
+
+    if cv2.waitKey(1) & 0xFF == ord("q"):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+</script>
+<script type="text/plain" id="src-baseline_2_vision.py">
+"""
+[baseline 2단계] AI 공 탐지 테스트 (모터 없이 눈으로만 확인)
+
+목표: 공을 비추면 초록 상자 + 공 이름 + 점수가 뜨면 성공!
+실행 전: baseline_1이 성공했어야 합니다. best.pt 파일이 같은 폴더에 있어야 합니다.
+종료: 카메라 창을 클릭하고 q 키
+"""
+
+import sys
+
+import cv2
+from ultralytics import YOLO
+
+VIDEO_SOURCE = 1   # baseline_1에서 성공한 번호와 같게
+CONF = 0.5         # 탐지 기준 점수(0~1). 공이 잘 안 잡히면 0.3으로 낮춰보세요.
+
+print("AI 모델 로딩 중... (조금 걸려요)")
+model = YOLO("best.pt")
+print("이 AI가 알아보는 것들:", list(model.names.values()))
+
+if sys.platform == "darwin":
+    cap = cv2.VideoCapture(VIDEO_SOURCE, cv2.CAP_AVFOUNDATION)
+else:
+    cap = cv2.VideoCapture(VIDEO_SOURCE)
+
+if not cap.isOpened():
+    print("카메라를 열 수 없습니다. VIDEO_SOURCE 숫자를 확인하세요.")
+    raise SystemExit
+
+print("탐지 시작! 공을 카메라에 보여주세요. (q = 종료)")
+
+while True:
+    ok, frame = cap.read()
+    if not ok:
+        continue
+
+    # AI에게 이 화면에 공이 있는지 물어본다
+    r = model.predict(frame, conf=CONF, verbose=False)[0]
+
+    # 찾은 공마다 초록 상자를 그린다
+    for box in r.boxes:
+        x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
+        label = model.names[int(box.cls[0])]      # 공 이름 (red_normal 등)
+        conf = float(box.conf[0])                 # AI의 확신 정도 (0~1)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.putText(frame, f"{label} {conf:.2f}", (x1, max(30, y1 - 10)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+
+    cv2.imshow("2. vision test (q=quit)", frame)
+
+    if cv2.waitKey(1) & 0xFF == ord("q"):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+</script>
+<script type="text/plain" id="src-baseline_3_motor.py">
+"""
+[baseline 3단계] 공 탐지 → 허브 A모터 1회전 (최종 목표!)
+
+목표: 공을 보여주면 허브의 A모터가 한 바퀴 돌면 성공!
+실행 전:
+  1. baseline_2가 성공했어야 합니다.
+  2. 허브에 spike_hub_a_once.py가 들어있어야 합니다. (가이드 4단계)
+  3. Pybricks 브라우저 탭을 완전히 닫으세요.
+  4. 허브를 "파란 깜빡임" 상태로 만드세요. (초록불이면 버튼 한 번)
+실행 후: 카메라 창이 뜨면 → 허브 가운데 버튼을 눌러 초록불로!
+종료: 카메라 창을 클릭하고 q 키
+"""
+
+import asyncio
+import sys
+
+import cv2
+from ultralytics import YOLO
+from bleak import BleakScanner, BleakClient
+
+HUB_NAME = "Pybricks Hub"   # ★ 우리 팀 허브 이름으로 바꾸세요!
+VIDEO_SOURCE = 1            # baseline_1에서 성공한 번호와 같게
+CONF = 0.5
+
+# 허브와 대화하는 블루투스 주소 (Pybricks 고정값, 바꾸지 마세요)
+PYBRICKS_CHAR = "c5f50002-8280-46da-89f4-6d8051e4aeef"
+
+
+async def main():
+    print("AI 모델 로딩 중...")
+    model = YOLO("best.pt")
+
+    print(f'허브 "{HUB_NAME}" 검색 중... (허브가 파란 깜빡임인지 확인!)')
+    device = None
+    while device is None:
+        device = await BleakScanner.find_device_by_name(HUB_NAME, timeout=10.0)
+        if device is None:
+            print("  아직 못 찾음. 허브를 파란 깜빡임으로 만들면 자동 연결됩니다...")
+
+    async with BleakClient(device) as client:
+        print("허브 연결 완료! 카메라를 엽니다.")
+
+        if sys.platform == "darwin":
+            cap = cv2.VideoCapture(VIDEO_SOURCE, cv2.CAP_AVFOUNDATION)
+        else:
+            cap = cv2.VideoCapture(VIDEO_SOURCE)
+
+        if not cap.isOpened():
+            print("카메라를 열 수 없습니다. VIDEO_SOURCE 숫자를 확인하세요.")
+            return
+
+        seen = 0      # 공이 연속으로 보인 프레임 수
+        empty = 0     # 공이 안 보인 프레임 수
+        armed = True  # True일 때만 모터 신호를 보냄 (공 하나당 딱 1번)
+
+        print(">>> 카메라 창이 뜨면 허브 가운데 버튼을 눌러 초록불로 만드세요! <<<")
+        print("공을 보여주면 모터가 돕니다. (q = 종료)")
+
+        while True:
+            ok, frame = cap.read()
+            if not ok:
+                await asyncio.sleep(0.1)
+                continue
+
+            r = model.predict(frame, conf=CONF, verbose=False)[0]
+
+            for box in r.boxes:
+                x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
+                label = model.names[int(box.cls[0])]
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.putText(frame, label, (x1, max(30, y1 - 10)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+
+            # 공 감지 안정화: 3프레임 연속 보여야 진짜 공으로 인정
+            if len(r.boxes) > 0:
+                seen += 1
+                empty = 0
+            else:
+                seen = 0
+                empty += 1
+                if empty >= 3:
+                    armed = True   # 공이 사라졌으니 다음 공 받을 준비
+
+            if armed and seen >= 3:
+                print("공 감지! → 허브에 모터 1회전 신호 전송")
+                # b"\x06" = "이건 명령이야" 표시, b"d" = 우리가 정한 '돌아라' 신호
+                await client.write_gatt_char(PYBRICKS_CHAR, b"\x06d", response=True)
+                armed = False
+
+            cv2.imshow("3. detect -> motor (q=quit)", frame)
+
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+        print("허브에 종료 신호 전송")
+        await client.write_gatt_char(PYBRICKS_CHAR, b"\x06q", response=True)
+
+
+if __name__ == "__main__":
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    asyncio.run(main())
+</script>
+<script type="text/plain" id="src-spike_hub_a_once.py">
+# =====================================================================
+# SPIKE 허브 프로그램 (Pybricks) — A모터 전용, "탐지되면 1회전"만 테스트
+# =====================================================================
+# Mac이 아니라 "허브"에서 돕니다.
+#   code.pybricks.com 접속 → 허브 연결 → 붙여넣기 → Download →
+#   Pybricks Code 연결 끊기 → Mac에서 detect_spin_a.py 실행 →
+#   허브 가운데 버튼 눌러 시작.
+#
+# Mac이 공을 감지할 때마다 "d"를 보내고, 허브는 A 모터를 SPIN_ANGLE만큼
+# (기본 360도 = 1회전) 돌린 뒤 다음 감지를 기다린다. 그 외 동작 없음
+# (색상 분류·컨베이어 상시 회전 없음 — spike_hub.py와 다름).
+# =====================================================================
+
+from pybricks.hubs import PrimeHub
+from pybricks.pupdevices import Motor
+from pybricks.parameters import Port, Color
+from pybricks.tools import wait
+
+from usys import stdin, stdout
+from uselect import poll
+
+hub = PrimeHub()
+
+PORT_A = Port.A
+
+SPIN_SPEED = 500   # deg/s
+SPIN_ANGLE = 360    # 1회전
+
+
+def try_motor(port, name):
+    try:
+        m = Motor(port)
+        print(name, "OK")
+        return m
+    except Exception:
+        print(name, "NOT FOUND")
+        return None
+
+
+def send(msg):
+    stdout.buffer.write(msg)
+
+
+A = try_motor(PORT_A, "A")
+
+keyboard = poll()
+keyboard.register(stdin)
+
+hub.light.on(Color.GREEN)
+send(b"rdy")
+
+while True:
+    if keyboard.poll(0):
+        cmd = stdin.buffer.read(1)
+        if not cmd:
+            continue
+
+        if cmd == b"q":
+            break
+
+        if cmd == b"d":
+            hub.display.char("d")
+            if A is not None:
+                A.run_angle(SPIN_SPEED, SPIN_ANGLE)
+
+        send(b"rdy")
+    else:
+        wait(10)
+
+if A is not None:
+    A.stop()
+hub.light.on(Color.RED)
+hub.display.off()
+</script>
+<script type="text/plain" id="src-detect_spin_a.py">
+"""
+탐지되면 허브 A 모터 1회전 (색상 분류 없는 테스트용).
+
+detect_only.py처럼 카메라를 열어 YOLO 박스를 화면에 그려 보여주면서,
+공이 연속 REQUIRED_OBJECT_FRAMES 프레임 이상 잡히면 허브에 "d"를 보낸다.
+허브 쪽은 spike_hub_a_once.py를 먼저 다운로드해 실행해야 한다
+(A 모터만 있고, 받으면 1회전 후 대기).
+
+사용법:
+    python detect_spin_a.py
+
+조작:
+    q  → 종료 (허브에 종료 코드 전송)
+"""
+
+import asyncio
+import sys
+import time
+from contextlib import suppress
+
+import cv2
+from ultralytics import YOLO
+from bleak import BleakScanner, BleakClient
+
+PYBRICKS_COMMAND_EVENT_CHAR_UUID = "c5f50002-8280-46da-89f4-6d8051e4aeef"
+
+HUB_NAME = "Pybricks Hub"
+MODEL_PATH = "best.pt"
+
+VIDEO_SOURCE = 1          # 1 = iPhone (연속성 카메라)
+CAM_WIDTH = 1280
+CAM_HEIGHT = 720
+
+CONF = 0.5
+
+# 공 하나당 한 번만 트리거되도록: 연속 감지 프레임 / 연속 빈 프레임 조건
+REQUIRED_OBJECT_FRAMES = 3
+REQUIRED_EMPTY_FRAMES = 3
+
+
+def open_camera(source, retries=6, delay=1.0):
+    for attempt in range(1, retries + 1):
+        if isinstance(source, int) and sys.platform == "darwin":
+            cap = cv2.VideoCapture(source, cv2.CAP_AVFOUNDATION)
+        else:
+            cap = cv2.VideoCapture(source)
+
+        if cap.isOpened():
+            if isinstance(source, int):
+                cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAM_WIDTH)
+                cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAM_HEIGHT)
+            ok = False
+            for _ in range(10):
+                ok, _ = cap.read()
+            if ok:
+                w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                print(f"[카메라 열림] source={source}, {w}x{h}")
+                return cap
+
+        cap.release()
+        print(f"[재시도 {attempt}/{retries}] source={source}")
+        time.sleep(delay)
+    return None
+
+
+async def main():
+    ready_event = asyncio.Event()
+
+    def handle_disconnect(_):
+        print("Hub disconnected.")
+
+    def handle_rx(_, data: bytearray):
+        if data and data[0] == 0x01:
+            payload = data[1:].strip()
+            # 허브가 뭐라도 응답하면 로그 (모터 처리 후 rdy를 보냄 → 허브 실행 중 확인용)
+            print(f"[허브 응답] {payload}")
+            if payload == b"rdy":
+                ready_event.set()
+
+    async def send_code(client, code: str):
+        # rdy 핸드셰이크 없이 바로 전송 (허브 프로그램이 실행 중이면 즉시 처리됨)
+        await client.write_gatt_char(
+            PYBRICKS_COMMAND_EVENT_CHAR_UUID,
+            b"\x06" + code.encode("utf-8"),
+            response=True,
+        )
+        print(f"[전송 완료] code={code}")
+
+    print("YOLO 모델 로딩 중...")
+    model = YOLO(MODEL_PATH)
+    print("클래스:", model.names)
+
+    print("허브 검색 중... (허브를 '파란 점멸'=연결 대기 상태로 두세요)")
+    print("  ※ 초록불이면 검색에 안 잡힙니다 → 허브 버튼 눌러 프로그램을 멈춰 파란 점멸로.")
+    device = None
+    for attempt in range(1, 19):  # 10초 x 18회 = 최대 3분 대기
+        device = await BleakScanner.find_device_by_name(HUB_NAME, timeout=10.0)
+        if device is not None:
+            break
+        print(f"  [{attempt}] 아직 못 찾음, 재시도 중... (허브를 파란 점멸로 두면 자동 연결)")
+    if device is None:
+        print(f"허브를 찾지 못했습니다: {HUB_NAME}")
+        print("확인: Pybricks Code 브라우저 탭 닫기, 허브 전원, 파란 점멸 여부")
+        return
+
+    print("허브 찾음:", device.name)
+
+    async with BleakClient(device, disconnected_callback=handle_disconnect) as client:
+        await client.start_notify(PYBRICKS_COMMAND_EVENT_CHAR_UUID, handle_rx)
+
+        print("허브 연결 완료. 카메라를 엽니다.")
+        print(">>> 카메라 창이 뜨면, 허브 가운데 버튼을 눌러 프로그램을 시작(초록불)해 두세요. <<<")
+
+        print(f"카메라 여는 중... (source={VIDEO_SOURCE})")
+        cap = open_camera(VIDEO_SOURCE)
+        if cap is None:
+            print("카메라를 열 수 없습니다. find_camera.py로 인덱스 확인하세요.")
+            return
+
+        object_seen_frames = 0
+        empty_count = 0
+        armed = True  # True면 다음 감지 시 트리거 가능
+
+        read_fail_count = 0
+        max_read_fail = 30
+
+        print("실시간 탐지 시작. 종료하려면 q를 누르세요.")
+
+        while True:
+            ok, frame = cap.read()
+
+            if not ok:
+                read_fail_count += 1
+                if read_fail_count >= max_read_fail:
+                    print("프레임을 계속 읽지 못해 종료합니다.")
+                    break
+                await asyncio.sleep(0.1)
+                continue
+            read_fail_count = 0
+
+            r = model.predict(frame, conf=CONF, verbose=False)[0]
+            n = len(r.boxes) if r.boxes is not None else 0
+            object_visible = n > 0
+
+            if r.boxes is not None:
+                for b in r.boxes:
+                    x1, y1, x2, y2 = map(int, b.xyxy[0].tolist())
+                    conf = float(b.conf[0])
+                    label = model.names[int(b.cls[0])]
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                    cv2.putText(
+                        frame, f"{label} {conf:.2f}", (x1, max(30, y1 - 10)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2,
+                    )
+
+            if object_visible:
+                object_seen_frames += 1
+                empty_count = 0
+            else:
+                object_seen_frames = 0
+                empty_count += 1
+                if empty_count >= REQUIRED_EMPTY_FRAMES:
+                    armed = True
+
+            if armed and object_seen_frames >= REQUIRED_OBJECT_FRAMES:
+                print(f"[공 연속 {REQUIRED_OBJECT_FRAMES}프레임 감지 → A모터 1회전 명령 전송]")
+                await send_code(client, "d")
+                armed = False
+
+            cv2.putText(
+                frame,
+                f"dets:{n}  armed:{armed}  (q=quit)",
+                (20, 35),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.7,
+                (0, 255, 255),
+                2,
+            )
+            cv2.imshow("detect -> A motor spin (q=quit)", frame)
+
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+        print("종료 코드 전송")
+        await send_code(client, "q")
+
+
+if __name__ == "__main__":
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    with suppress(asyncio.CancelledError):
+        asyncio.run(main())
+</script>
+<script type="text/plain" id="src-find_camera.py">
+"""
+카메라 인덱스 찾기 도우미.
+
+macOS 연속성 카메라(iPhone)가 몇 번 인덱스인지 확인하는 스크립트.
+1) AVFoundation이 인식한 실제 카메라 이름 + 인덱스 표를 먼저 출력하고,
+2) 각 인덱스를 하나씩 열어 미리보기 창을 띄운다.
+
+사용법:
+    python find_camera.py
+
+조작(미리보기 창에서):
+    n  → 다음 카메라로
+    s  → 지금 인덱스를 VIDEO_SOURCE 값으로 출력하고 종료
+    q  → 그냥 종료
+
+주의:
+    - 처음 실행 시 macOS 카메라 권한 팝업이 뜨면 '허용'.
+      (시스템 설정 > 개인정보 보호 및 보안 > 카메라)
+    - iPhone은 '잠금 + 거치 고정 + 후면 카메라가 대상' 상태여야
+      연속성 카메라로 잡힌다. 손에 들거나 잠금 해제하면 내장캠으로 폴백된다.
+"""
+
+import sys
+import cv2
+
+MAX_INDEX = 6
+
+
+def print_avf_devices():
+    """AVFoundation이 보는 카메라 이름 목록을 인덱스와 함께 출력(가능할 때만)."""
+    try:
+        import AVFoundation as AVF
+    except Exception:
+        print("(AVFoundation 목록 조회 불가 — 미리보기로만 확인하세요)\n")
+        return
+
+    try:
+        devs = AVF.AVCaptureDevice.devicesWithMediaType_(AVF.AVMediaTypeVideo)
+    except Exception:
+        devs = None
+
+    print("=== macOS가 인식한 카메라 (보통 이 순서 = OpenCV 인덱스) ===")
+    if not devs:
+        print("  (없음) iPhone이 연속성 카메라로 송출 중인지 확인하세요.")
+    else:
+        for i, d in enumerate(devs):
+            print(f"  index {i}: {d.localizedName()}")
+    print()
+
+
+def make_cap(idx):
+    if sys.platform == "darwin":
+        return cv2.VideoCapture(idx, cv2.CAP_AVFOUNDATION)
+    return cv2.VideoCapture(idx)
+
+
+def main():
+    print_avf_devices()
+
+    found = []
+
+    for idx in range(MAX_INDEX):
+        cap = make_cap(idx)
+
+        if not cap.isOpened():
+            cap.release()
+            continue
+
+        ok = False
+        frame = None
+        for _ in range(10):
+            ok, frame = cap.read()
+
+        if not ok:
+            cap.release()
+            continue
+
+        w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        print(f"index {idx}: 열림 {w}x{h}  -> iPhone 화면이면 s, 아니면 n")
+        found.append(idx)
+
+        while True:
+            ok, frame = cap.read()
+            if not ok:
+                break
+
+            cv2.putText(
+                frame,
+                f"index {idx}  {w}x{h}  (n=next, s=select, q=quit)",
+                (20, 40),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.8,
+                (0, 255, 0),
+                2,
+            )
+            cv2.imshow("find_camera", frame)
+
+            key = cv2.waitKey(1) & 0xFF
+
+            if key == ord("n"):
+                break
+
+            if key == ord("s"):
+                cap.release()
+                cv2.destroyAllWindows()
+                print()
+                print(f"[선택됨] index {idx}")
+                print("balldetection_1.py 에서 다음처럼 설정하세요:")
+                print(f"    VIDEO_SOURCE = {idx}")
+                return
+
+            if key == ord("q"):
+                cap.release()
+                cv2.destroyAllWindows()
+                return
+
+        cap.release()
+
+    cv2.destroyAllWindows()
+
+    if not found:
+        print("열리는 카메라가 없습니다.")
+        print("  - iPhone: 연속성 카메라 ON + 잠금 + 거치 고정 + 같은 Apple ID + WiFi/BT ON")
+        print("  - 카메라 권한 허용 후 앱(터미널/VSCode) 재시작")
+    else:
+        print(f"열린 인덱스: {found}")
+
+
+if __name__ == "__main__":
+    main()
+</script>
+<script type="text/plain" id="src-requirements.txt">
+# 레고 AI 실습 필수 패키지
+# 설치: pip install -r requirements.txt
+ultralytics    # YOLO 공 탐지 (PyTorch 포함, 용량 큼)
+opencv-python  # 카메라 열기 + 화면 표시
+bleak          # 허브 블루투스 통신
+</script>
+<script>
+  document.querySelectorAll(".dl-copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var name = btn.getAttribute("data-file");
+      var text = document.getElementById("src-" + name).textContent.replace(/^\n/, "");
+      navigator.clipboard.writeText(text).then(function () {
+        var old = btn.textContent;
+        btn.textContent = "복사됨!";
+        setTimeout(function () { btn.textContent = old; }, 1500);
+      });
+    });
+  });
+</script>
